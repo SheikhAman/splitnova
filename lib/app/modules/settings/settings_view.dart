@@ -278,6 +278,8 @@ class SettingsView extends GetView<SettingsController> {
       icon: Icons.share_outlined,
       children: [
         if (social.facebook.isNotEmpty) _buildLinkTile('facebook'.tr, social.facebook, Icons.facebook),
+        if (social.github.isNotEmpty) _buildLinkTile('github'.tr, social.github, Icons.code),
+        if (social.whatsapp.isNotEmpty) _buildLinkTile('whatsapp'.tr, 'https://wa.me/${social.whatsapp.replaceAll('+', '').replaceAll(' ', '')}', Icons.chat_outlined),
         if (social.twitter.isNotEmpty) _buildLinkTile('twitter'.tr, social.twitter, Icons.alternate_email),
         if (social.instagram.isNotEmpty) _buildLinkTile('instagram'.tr, social.instagram, Icons.camera_alt_outlined),
         if (social.youtube.isNotEmpty) _buildLinkTile('youtube'.tr, social.youtube, Icons.play_circle_outline),

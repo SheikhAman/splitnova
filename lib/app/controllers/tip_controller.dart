@@ -168,6 +168,8 @@ class TipController extends GetxController {
       numberOfPeople.value = peopleList.length;
       peopleTextController.text = numberOfPeople.value.toString();
       rebalancePercentages();
+    } else {
+      _showToast('error'.tr, 'min_person_reached'.tr);
     }
   }
 

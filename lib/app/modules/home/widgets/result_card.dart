@@ -95,35 +95,48 @@ class ResultCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'total_amount'.tr.toUpperCase(),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'total_amount'.tr.toUpperCase(),
+                          style: TextStyle(
+                            color: Colors.white, 
+                            fontSize: AppSizes.fontXS + 1, 
+                            fontWeight: FontWeight.w900, 
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'grand_total'.tr,
+                        style: TextStyle(
+                          color: Colors.white54, 
+                          fontSize: AppSizes.fontXS,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: AppSizes.paddingM),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      controller.formatMoney(controller.totalAmount),
                       style: TextStyle(
                         color: Colors.white, 
-                        fontSize: AppSizes.fontXS + 1, 
+                        fontSize: AppSizes.fontXXXL + 4, 
                         fontWeight: FontWeight.w900, 
-                        letterSpacing: 1.2,
+                        letterSpacing: -0.5,
                       ),
                     ),
-                    Text(
-                      'grand_total'.tr,
-                      style: TextStyle(
-                        color: Colors.white54, 
-                        fontSize: AppSizes.fontXS,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  controller.formatMoney(controller.totalAmount),
-                  style: TextStyle(
-                    color: Colors.white, 
-                    fontSize: AppSizes.fontXXXL + 4, 
-                    fontWeight: FontWeight.w900, 
-                    letterSpacing: -0.5,
                   ),
                 ),
               ],
@@ -208,32 +221,38 @@ class ResultCard extends StatelessWidget {
               color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(10.0),
             ),
-            child: Icon(icon, color: Colors.white70, size: AppSizes.iconM - 2),
+            child: Icon(icon, color: Colors.white70, size: AppSizes.iconM - 4),
           ),
-          SizedBox(width: AppSizes.paddingM),
+          SizedBox(width: AppSizes.paddingS),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label.toUpperCase(), 
-                  style: TextStyle(
-                    color: Colors.white54, 
-                    fontSize: AppSizes.fontXS - 1, 
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                  ), 
-                  maxLines: 1
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    label.toUpperCase(), 
+                    style: TextStyle(
+                      color: Colors.white54, 
+                      fontSize: AppSizes.fontXS - 1, 
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ), 
+                  ),
                 ),
                 SizedBox(height: 2.0),
-                Text(
-                  value, 
-                  style: TextStyle(
-                    color: Colors.white, 
-                    fontSize: AppSizes.fontL - 1, 
-                    fontWeight: FontWeight.w800,
-                  ), 
-                  maxLines: 1
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value, 
+                    style: TextStyle(
+                      color: Colors.white, 
+                      fontSize: AppSizes.fontL - 1, 
+                      fontWeight: FontWeight.w800,
+                    ), 
+                  ),
                 ),
               ],
             ),
@@ -292,7 +311,7 @@ class ResultCard extends StatelessWidget {
 
   Widget _buildPersonGridItem(TipController controller, dynamic person) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM + 2),
+      padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingS),
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.12),
         borderRadius: BorderRadius.circular(AppSizes.radiusL),
@@ -301,6 +320,7 @@ class ResultCard extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
+            flex: 2,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -310,31 +330,39 @@ class ResultCard extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white, 
                     fontWeight: FontWeight.w700, 
-                    fontSize: AppSizes.fontS,
+                    fontSize: AppSizes.fontXS + 1,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 )),
-                SizedBox(height: 2.0),
+                SizedBox(height: 1.0),
                 Obx(() => Text(
                   '${person.percentage.value}%',
                   style: TextStyle(
                     color: Colors.white38, 
-                    fontSize: AppSizes.fontXS,
+                    fontSize: AppSizes.fontXS - 1,
                     fontWeight: FontWeight.w500,
                   ),
                 )),
               ],
             ),
           ),
-          Obx(() => Text(
-            controller.formatMoney(person.getAmount(controller.totalAmount)),
-            style: TextStyle(
-              color: Colors.white, 
-              fontWeight: FontWeight.w800, 
-              fontSize: AppSizes.fontM - 1,
-            ),
-          )),
+          SizedBox(width: 4),
+          Expanded(
+            flex: 3,
+            child: Obx(() => FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: Text(
+                controller.formatMoney(person.getAmount(controller.totalAmount)),
+                style: TextStyle(
+                  color: Colors.white, 
+                  fontWeight: FontWeight.w800, 
+                  fontSize: AppSizes.fontS,
+                ),
+              ),
+            )),
+          ),
         ],
       ),
     );

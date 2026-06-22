@@ -32,7 +32,7 @@ android {
         applicationId = "com.arise.splitnova"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 1
+        versionCode = 4
         versionName = "1.0.0"
     }
 

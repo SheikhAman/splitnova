@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -100,9 +98,11 @@ class SettingsController extends GetxController {
   }
 
   Future<void> sendEmail(String email) async {
+    final String subject = 'Support/Feedback - SplitNova (v${appVersion.value})';
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: email,
+      query: 'subject=${Uri.encodeComponent(subject)}',
     );
     launchURL(emailLaunchUri.toString());
   }

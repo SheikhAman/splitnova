@@ -17,6 +17,7 @@ class HistoryView extends GetView<HistoryController> {
     return Scaffold(
       appBar: AppBar(
         title: Text('history'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_sweep),

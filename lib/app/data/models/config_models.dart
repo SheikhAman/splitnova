@@ -101,6 +101,8 @@ class SocialConfig {
   final String instagram;
   final String youtube;
   final String linkedin;
+  final String github;
+  final String whatsapp;
 
   SocialConfig({
     required this.facebook,
@@ -108,6 +110,8 @@ class SocialConfig {
     required this.instagram,
     required this.youtube,
     required this.linkedin,
+    required this.github,
+    required this.whatsapp,
   });
 
   bool get isEmpty =>
@@ -115,7 +119,9 @@ class SocialConfig {
       twitter.isEmpty &&
       instagram.isEmpty &&
       youtube.isEmpty &&
-      linkedin.isEmpty;
+      linkedin.isEmpty &&
+      github.isEmpty &&
+      whatsapp.isEmpty;
 
   bool get isNotEmpty => !isEmpty;
 
@@ -126,6 +132,8 @@ class SocialConfig {
       'instagram': instagram,
       'youtube': youtube,
       'linkedin': linkedin,
+      'github': github,
+      'whatsapp': whatsapp,
     }..removeWhere((key, value) => value.isEmpty);
   }
 
@@ -136,6 +144,8 @@ class SocialConfig {
       instagram: map['instagram'] ?? '',
       youtube: map['youtube'] ?? '',
       linkedin: map['linkedin'] ?? '',
+      github: map['github'] ?? '',
+      whatsapp: map['whatsapp'] ?? '',
     );
   }
 
@@ -145,6 +155,8 @@ class SocialConfig {
         instagram: '',
         youtube: '',
         linkedin: '',
+        github: '',
+        whatsapp: '',
       );
 }
 
