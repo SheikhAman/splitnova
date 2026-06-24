@@ -48,3 +48,9 @@ app.*.map.json
 *.jks
 *.keystore
 key.properties
+
+# Local environment and API keys
+local.properties
+.env
+**/android/app/google-services.json
+**/ios/Runner/GoogleService-Info.plist
