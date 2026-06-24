@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../modules/home/home_controller.dart';
 
 class Person {
   final String id;
@@ -222,7 +223,7 @@ class TipController extends GetxController {
   }
 
   void incrementPeople() {
-    if (numberOfPeople.value < 1000) {
+    if (numberOfPeople.value < 99999) {
       numberOfPeople.value++;
       peopleTextController.text = numberOfPeople.value.toString();
     }
@@ -242,7 +243,7 @@ class TipController extends GetxController {
     }
     int? val = int.tryParse(value);
     if (val != null) {
-      numberOfPeople.value = val.clamp(1, 1000);
+      numberOfPeople.value = val.clamp(1, 99999);
     }
   }
 
@@ -421,8 +422,21 @@ class TipController extends GetxController {
     }
     
     _box.write('history', history);
+    _navigateToHistory();
     reset(); // Clear all fields after successful save
     editingHistoryId.value = null; // Clear editing state after save
+  }
+
+  void _navigateToHistory() {
+    try {
+      // Find the controller without a hard type dependency to avoid circular imports
+      if (Get.isRegistered<HomeController>()) {
+        Get.find<HomeController>().selectedIndex.value = 1;
+      }
+      Get.offNamed('/history');
+    } catch (e) {
+      Get.offAllNamed('/history');
+    }
   }
 
   void _showToast(String title, String message) {

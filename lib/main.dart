@@ -45,21 +45,24 @@ class SplitNovaApp extends StatelessWidget {
         final themeController = Get.find<ThemeController>();
         final languageController = Get.find<LanguageController>();
 
-        return Obx(() => GetMaterialApp(
-          title: "SplitNova",
-          debugShowCheckedModeBanner: false,
-          
-          // Theme Configuration
-          theme: themeController.currentTheme,
-          
-          // Localization / Internationalization (i18n)
-          translations: AppTranslations(),
-          locale: languageController.locale,
-          fallbackLocale: const Locale('en', 'US'),
-          
-          // Routing
-          initialRoute: AppPages.INITIAL,
-          getPages: AppPages.routes,
+        return Obx(() => GestureDetector(
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: GetMaterialApp(
+            title: "SplitNova",
+            debugShowCheckedModeBanner: false,
+            
+            // Theme Configuration
+            theme: themeController.currentTheme,
+            
+            // Localization / Internationalization (i18n)
+            translations: AppTranslations(),
+            locale: languageController.locale,
+            fallbackLocale: const Locale('en', 'US'),
+            
+            // Routing
+            initialRoute: AppPages.INITIAL,
+            getPages: AppPages.routes,
+          ),
         ));
       },
     );

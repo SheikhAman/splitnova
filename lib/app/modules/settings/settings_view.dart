@@ -35,6 +35,57 @@ class SettingsView extends GetView<SettingsController> {
             _buildSectionTitle('appearance'.tr),
             _buildThemeSettings(context, themeController, langController),
             
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingXS),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'primary_color'.tr.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: AppSizes.fontS,
+                      fontWeight: FontWeight.bold,
+                      color: Get.theme.primaryColor,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: AppSizes.paddingS),
+                  Obx(() => Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: themeController.colorPalette.map((color) {
+                      final isSelected = themeController.primaryColor.value.value == color.value;
+                      return GestureDetector(
+                        onTap: () => themeController.setPrimaryColor(color),
+                        child: Container(
+                          width: 35,
+                          height: 35,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? (Get.isDarkMode ? Colors.white : Colors.black) : Colors.transparent,
+                              width: 2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: isSelected 
+                              ? const Icon(Icons.check, color: Colors.white, size: 20) 
+                              : null,
+                        ),
+                      );
+                    }).toList(),
+                  )),
+                ],
+              ),
+            ),
+            
             _buildSectionTitle('defaults'.tr),
             _buildDefaultSettings(context),
 

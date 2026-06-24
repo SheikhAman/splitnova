@@ -41,40 +41,47 @@ class PeopleCounter extends StatelessWidget {
                     color: Get.isDarkMode ? Colors.white24 : const Color(0xFFE2E8F0),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.person, 
-                      color: Theme.of(context).primaryColor, 
-                      size: AppSizes.iconL
-                    ),
-                    SizedBox(width: AppSizes.paddingS),
-                    SizedBox(
-                      width: 60.0,
-                      child: TextField(
-                        controller: controller.peopleTextController,
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                        onTap: () {
-                          if (controller.peopleTextController.text == '0' || controller.peopleTextController.text == '1') {
-                            controller.peopleTextController.clear();
-                          }
-                        },
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: AppSizes.fontXXL, fontWeight: FontWeight.bold),
-                        decoration: const InputDecoration(
-                          hintText: "1",
-                          border: InputBorder.none,
-                          isDense: true,
+                child: IntrinsicHeight(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: AppSizes.paddingM),
+                        child: Icon(
+                          Icons.person, 
+                          color: Theme.of(context).primaryColor, 
+                          size: AppSizes.iconL
                         ),
-                        onChanged: (val) => controller.updatePeopleFromText(val),
                       ),
-                    ),
-                  ],
+                      SizedBox(width: AppSizes.paddingM),
+                      Expanded(
+                        child: TextField(
+                          controller: controller.peopleTextController,
+                          enableSuggestions: false,
+                          autocorrect: false,
+                          spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          onTap: () {
+                            if (controller.peopleTextController.text == '0' || controller.peopleTextController.text == '1') {
+                              controller.peopleTextController.clear();
+                            }
+                          },
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: AppSizes.fontXXL, fontWeight: FontWeight.bold),
+                          decoration: const InputDecoration(
+                            hintText: "1",
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.symmetric(vertical: 8),
+                          ),
+                          onChanged: (val) => controller.updatePeopleFromText(val),
+                        ),
+                      ),
+                      // Mirror padding to keep text centered
+                      SizedBox(width: AppSizes.paddingM + AppSizes.iconL + AppSizes.paddingM),
+                    ],
+                  ),
                 ),
               ),
             ),

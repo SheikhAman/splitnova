@@ -15,91 +15,96 @@ class ActionButtons extends GetView<HomeController> {
   Widget build(BuildContext context) {
     final tipController = Get.find<TipController>();
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionButton(
-              context,
-              Icons.refresh,
-              'reset'.tr,
-              Colors.orange,
-              tipController.reset,
-            ),
-            _buildActionButton(
-              context,
-              Icons.share,
-              'share'.tr,
-              Colors.green,
-              () {
-                if (tipController.validateBill()) {
-                  tipController.shareToWhatsApp();
-                }
-              },
-            ),
-            _buildActionButton(
-              context,
-              Icons.image,
-              'save'.tr,
-              Colors.blue,
-              () {
-                if (tipController.validateBill()) {
-                  controller.captureAndSave();
-                }
-              },
-            ),
-          ],
+    return Obx(() {
+      final List<Map<String, dynamic>> buttons = [
+        {
+          'icon': Icons.refresh,
+          'label': 'reset'.tr,
+          'color': Colors.orange,
+          'onTap': () => tipController.reset(),
+        },
+        {
+          'icon': Icons.share,
+          'label': 'share'.tr,
+          'color': Colors.green,
+          'onTap': () {
+            if (tipController.validateBill()) {
+              tipController.shareToWhatsApp();
+            }
+          },
+        },
+        {
+          'icon': Icons.image,
+          'label': 'save_image'.tr,
+          'color': Colors.blue,
+          'onTap': () {
+            if (tipController.validateBill()) {
+              controller.captureAndSave();
+            }
+          },
+        },
+        {
+          'icon': Icons.copy,
+          'label': 'copy'.tr,
+          'color': Colors.teal,
+          'onTap': () {
+            if (tipController.validateBill()) {
+              Clipboard.setData(ClipboardData(text: tipController.shareMessage));
+              Fluttertoast.showToast(
+                msg: 'copied_to_clipboard'.tr,
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                backgroundColor: Colors.teal.withOpacity(0.8),
+                textColor: Colors.white,
+                fontSize: AppSizes.fontM,
+              );
+            }
+          },
+        },
+        {
+          'icon': Icons.qr_code,
+          'label': 'qr'.tr,
+          'color': Colors.purple,
+          'onTap': () {
+            if (tipController.validateBill()) {
+              _showQRCodeBottomSheet(context, tipController.shareMessage);
+            }
+          },
+        },
+        {
+          'icon': tipController.editingHistoryId.value != null ? Icons.update : Icons.save_alt,
+          'label': tipController.editingHistoryId.value != null ? 'update'.tr : 'save_history'.tr,
+          'color': tipController.editingHistoryId.value != null ? Colors.red : Colors.indigo,
+          'onTap': () {
+            if (tipController.validateBill()) {
+              tipController.saveToHistory();
+            }
+          },
+        },
+      ];
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: AppSizes.paddingS,
+          crossAxisSpacing: AppSizes.paddingS,
+          childAspectRatio: 1.1,
         ),
-        SizedBox(height: AppSizes.paddingL),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildActionButton(
-              context,
-              Icons.copy,
-              'copy'.tr,
-              Colors.teal,
-              () {
-                if (tipController.validateBill()) {
-                  Clipboard.setData(ClipboardData(text: tipController.shareMessage));
-                  Fluttertoast.showToast(
-                    msg: 'copied_to_clipboard'.tr,
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM,
-                    backgroundColor: Colors.teal.withOpacity(0.8),
-                    textColor: Colors.white,
-                    fontSize: AppSizes.fontM,
-                  );
-                }
-              },
-            ),
-            _buildActionButton(
-              context,
-              Icons.qr_code,
-              'qr'.tr,
-              Colors.purple,
-              () {
-                if (tipController.validateBill()) {
-                  _showQRCodeBottomSheet(context, tipController.shareMessage);
-                }
-              },
-            ),
-            Obx(() => _buildActionButton(
-              context,
-              tipController.editingHistoryId.value != null ? Icons.update : Icons.save_alt,
-              tipController.editingHistoryId.value != null ? 'update'.tr : 'history'.tr,
-              tipController.editingHistoryId.value != null ? Colors.red : Colors.indigo,
-              () {
-                if (tipController.validateBill()) {
-                  tipController.saveToHistory();
-                }
-              },
-            )),
-          ],
-        ),
-      ],
-    );
+        itemCount: buttons.length,
+        itemBuilder: (context, index) {
+          final btn = buttons[index];
+          return _buildActionButton(
+            context,
+            btn['icon'],
+            btn['label'],
+            btn['color'],
+            btn['onTap'],
+          );
+        },
+      );
+    });
   }
 
   Widget _buildActionButton(BuildContext context, IconData icon, String label, Color color, VoidCallback onTap) {
@@ -118,7 +123,11 @@ class ActionButtons extends GetView<HomeController> {
             child: Icon(icon, color: color, size: AppSizes.iconL),
           ),
           SizedBox(height: AppSizes.paddingXS),
-          Text(label, style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.w500)),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
