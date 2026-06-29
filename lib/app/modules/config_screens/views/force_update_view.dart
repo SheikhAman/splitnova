@@ -27,7 +27,7 @@ class ForceUpdateView extends StatelessWidget {
               end: Alignment.bottomCenter,
               colors: [
                 Theme.of(context).primaryColor,
-                Theme.of(context).primaryColor.withOpacity(0.8),
+                Theme.of(context).primaryColor.withValues(alpha: 0.8),
               ],
             ),
           ),
@@ -61,7 +61,7 @@ class ForceUpdateView extends StatelessWidget {
                 message.isEmpty ? 'update_message_default'.tr : message,
                 style: TextStyle(
                   fontSize: AppSizes.fontL,
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -70,9 +70,9 @@ class ForceUpdateView extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(AppSizes.paddingL),
                 decoration: BoxDecoration(
-                  color: AppColors.warningAmber.withOpacity(0.2),
+                  color: AppColors.warningAmber.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                  border: Border.all(color: AppColors.warningAmber.withOpacity(0.5)),
+                  border: Border.all(color: AppColors.warningAmber.withValues(alpha: 0.5)),
                 ),
                 child: Column(
                   children: [
@@ -89,7 +89,7 @@ class ForceUpdateView extends StatelessWidget {
                     SizedBox(height: AppSizes.paddingS),
                     Text(
                       'data_loss_warning_message'.tr,
-                      style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: AppSizes.fontS),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: AppSizes.fontS),
                     ),
                   ],
                 ),

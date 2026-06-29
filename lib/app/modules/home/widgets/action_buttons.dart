@@ -54,7 +54,7 @@ class ActionButtons extends GetView<HomeController> {
                 msg: 'copied_to_clipboard'.tr,
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.BOTTOM,
-                backgroundColor: Colors.teal.withOpacity(0.8),
+                backgroundColor: Colors.teal.withValues(alpha: 0.8),
                 textColor: Colors.white,
                 fontSize: AppSizes.fontM,
               );
@@ -116,9 +116,9 @@ class ActionButtons extends GetView<HomeController> {
           Container(
             padding: EdgeInsets.all(AppSizes.paddingM),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSizes.radiusM),
-              border: Border.all(color: color.withOpacity(0.5)),
+              border: Border.all(color: color.withValues(alpha: 0.5)),
             ),
             child: Icon(icon, color: color, size: AppSizes.iconL),
           ),
@@ -164,7 +164,7 @@ class ActionButtons extends GetView<HomeController> {
                   borderRadius: BorderRadius.circular(AppSizes.radiusL),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),

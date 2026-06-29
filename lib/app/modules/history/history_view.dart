@@ -32,7 +32,7 @@ class HistoryView extends GetView<HistoryController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.history, size: AppSizes.iconXXL * 2, color: Colors.grey.withOpacity(0.5)),
+                Icon(Icons.history, size: AppSizes.iconXXL * 2, color: Colors.grey.withValues(alpha: 0.5)),
                 SizedBox(height: AppSizes.paddingL),
                 Text('no_history'.tr, style: TextStyle(fontSize: AppSizes.fontL, color: Colors.grey)),
               ],
@@ -129,7 +129,7 @@ class HistoryView extends GetView<HistoryController> {
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingS, vertical: AppSizes.paddingXS),
                         decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppSizes.radiusS),
                         ),
                         child: Row(
@@ -177,7 +177,7 @@ class HistoryView extends GetView<HistoryController> {
                             Container(
                               padding: EdgeInsets.all(AppSizes.paddingM),
                               decoration: BoxDecoration(
-                                color: Colors.grey.withOpacity(0.05),
+                                color: Colors.grey.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(AppSizes.radiusM),
                               ),
                               child: Column(
@@ -272,7 +272,7 @@ class HistoryView extends GetView<HistoryController> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM, vertical: AppSizes.paddingS),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.05),
+          color: color.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(AppSizes.radiusM),
         ),
         child: Column(
@@ -292,7 +292,7 @@ class HistoryView extends GetView<HistoryController> {
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.black.withOpacity(0.8),
+      backgroundColor: Colors.black.withValues(alpha: 0.8),
       textColor: Colors.white,
       fontSize: AppSizes.fontM,
     );
@@ -331,7 +331,7 @@ class HistoryView extends GetView<HistoryController> {
                     borderRadius: BorderRadius.circular(AppSizes.radiusL),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         spreadRadius: 2,
                       ),

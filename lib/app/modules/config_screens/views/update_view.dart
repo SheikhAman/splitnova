@@ -25,7 +25,7 @@ class UpdateView extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor.withOpacity(0.8),
+              Theme.of(context).primaryColor.withValues(alpha: 0.8),
             ],
           ),
         ),
@@ -59,7 +59,7 @@ class UpdateView extends StatelessWidget {
               message.isEmpty ? 'update_message_default'.tr : message,
               style: TextStyle(
                 fontSize: AppSizes.fontL,
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
               ),
               textAlign: TextAlign.center,
             ),

@@ -180,7 +180,7 @@ class SettingsController extends GetxController {
       msg: message,
       toastLength: Toast.LENGTH_LONG,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: bgColor.withOpacity(0.8),
+      backgroundColor: bgColor.withValues(alpha: 0.8),
       textColor: Colors.white,
       fontSize: AppSizes.fontM,
     );

@@ -61,15 +61,15 @@ class AppSizes {
 
 class AppColors {
   static const Color warningAmber = Color(0xFFFFC107);
-  static final Color warningAmberLight = warningAmber.withOpacity(0.1);
-  static final Color warningAmberBorder = warningAmber.withOpacity(0.2);
+  static final Color warningAmberLight = warningAmber.withValues(alpha: 0.1);
+  static final Color warningAmberBorder = warningAmber.withValues(alpha: 0.2);
   
   static const Color successGreen = Colors.green;
   static const Color errorRed = Colors.redAccent;
   
   static Color getCardBorderColor(BuildContext context) => 
-      Theme.of(context).dividerColor.withOpacity(0.05);
+      Theme.of(context).dividerColor.withValues(alpha: 0.05);
       
   static Color getPrimaryLight(BuildContext context) => 
-      Theme.of(context).primaryColor.withOpacity(0.1);
+      Theme.of(context).primaryColor.withValues(alpha: 0.1);
 }

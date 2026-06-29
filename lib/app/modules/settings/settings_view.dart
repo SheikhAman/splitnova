@@ -36,7 +36,7 @@ class SettingsView extends GetView<SettingsController> {
             _buildThemeSettings(context, themeController, langController),
             
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingXS),
+              padding: EdgeInsets.only(top: AppSizes.paddingL, bottom: AppSizes.paddingS, left: AppSizes.paddingXS),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -69,7 +69,7 @@ class SettingsView extends GetView<SettingsController> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: color.withOpacity(0.3),
+                                color: color.withValues(alpha: 0.3),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -108,7 +108,7 @@ class SettingsView extends GetView<SettingsController> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: AppSizes.paddingXL, horizontal: AppSizes.paddingL),
       decoration: BoxDecoration(
-        color: AppColors.getPrimaryLight(context).withOpacity(0.05),
+        color: AppColors.getPrimaryLight(context).withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSizes.radiusXXL),
         border: Border.all(color: AppColors.getPrimaryLight(context)),
       ),
@@ -121,7 +121,7 @@ class SettingsView extends GetView<SettingsController> {
               borderRadius: BorderRadius.circular(AppSizes.radiusL),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -289,7 +289,7 @@ class SettingsView extends GetView<SettingsController> {
         padding: EdgeInsets.all(AppSizes.paddingXS),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: Get.theme.primaryColor.withOpacity(0.3)),
+          border: Border.all(color: Get.theme.primaryColor.withValues(alpha: 0.3)),
         ),
         child: Icon(icon, size: AppSizes.iconS, color: Get.theme.primaryColor),
       ),
@@ -351,9 +351,9 @@ class SettingsView extends GetView<SettingsController> {
         if (contact.email.isNotEmpty)
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 2),
-            leading: Icon(Icons.email_outlined, size: AppSizes.iconM, color: Get.theme.primaryColor.withOpacity(0.8)),
+            leading: Icon(Icons.email_outlined, size: AppSizes.iconM, color: Get.theme.primaryColor.withValues(alpha: 0.8)),
             title: Text('email'.tr, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)),
-            subtitle: Text(contact.email, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey.withOpacity(0.8))),
+            subtitle: Text(contact.email, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey.withValues(alpha: 0.8))),
             trailing: SizedBox(
               width: AppSizes.iconM,
               height: AppSizes.iconM,
@@ -362,7 +362,7 @@ class SettingsView extends GetView<SettingsController> {
                 constraints: const BoxConstraints(),
                 icon: const Icon(Icons.keyboard_arrow_right_rounded),
                 onPressed: () => controller.sendEmail(contact.email),
-                color: Get.theme.primaryColor.withOpacity(0.7),
+                color: Get.theme.primaryColor.withValues(alpha: 0.7),
               ),
             ),
             onTap: () => controller.sendEmail(contact.email),
@@ -387,7 +387,7 @@ class SettingsView extends GetView<SettingsController> {
         if (about.developerName.isNotEmpty)
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 2),
-            leading: Icon(Icons.person_outline, size: AppSizes.iconM, color: Get.theme.primaryColor.withOpacity(0.8)), 
+            leading: Icon(Icons.person_outline, size: AppSizes.iconM, color: Get.theme.primaryColor.withValues(alpha: 0.8)), 
             title: Text('developer'.tr, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)), 
             trailing: Text(about.developerName, style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.bold, color: Get.theme.primaryColor)),
             titleAlignment: ListTileTitleAlignment.center,
@@ -395,7 +395,7 @@ class SettingsView extends GetView<SettingsController> {
         if (about.publisherName.isNotEmpty)
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 2),
-            leading: Icon(Icons.business_center_outlined, size: AppSizes.iconM, color: Get.theme.primaryColor.withOpacity(0.8)), 
+            leading: Icon(Icons.business_center_outlined, size: AppSizes.iconM, color: Get.theme.primaryColor.withValues(alpha: 0.8)), 
             title: Text('publisher'.tr, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)), 
             trailing: Text(about.publisherName, style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.bold, color: Get.theme.primaryColor)),
             titleAlignment: ListTileTitleAlignment.center,
@@ -416,7 +416,7 @@ class SettingsView extends GetView<SettingsController> {
       children: [
         ListTile(
           contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 2),
-          leading: Icon(Icons.star_outline, size: AppSizes.iconM, color: Get.theme.primaryColor.withOpacity(0.8)),
+          leading: Icon(Icons.star_outline, size: AppSizes.iconM, color: Get.theme.primaryColor.withValues(alpha: 0.8)),
           title: Text('rate_us'.tr, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)),
           trailing: SizedBox(
             width: AppSizes.iconM,
@@ -430,7 +430,7 @@ class SettingsView extends GetView<SettingsController> {
                   controller.launchURL(app.playStoreUrl);
                 }
               },
-              color: Get.theme.primaryColor.withOpacity(0.7),
+              color: Get.theme.primaryColor.withValues(alpha: 0.7),
             ),
           ),
           onTap: () {
@@ -442,7 +442,7 @@ class SettingsView extends GetView<SettingsController> {
         ),
         ListTile(
           contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 2),
-          leading: Icon(Icons.share_outlined, size: AppSizes.iconM, color: Get.theme.primaryColor.withOpacity(0.8)),
+          leading: Icon(Icons.share_outlined, size: AppSizes.iconM, color: Get.theme.primaryColor.withValues(alpha: 0.8)),
           title: Text('share_app'.tr, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)),
           trailing: SizedBox(
             width: AppSizes.iconM,
@@ -452,7 +452,7 @@ class SettingsView extends GetView<SettingsController> {
               constraints: const BoxConstraints(),
               icon: const Icon(Icons.keyboard_arrow_right_rounded),
               onPressed: controller.shareApp,
-              color: Get.theme.primaryColor.withOpacity(0.7),
+              color: Get.theme.primaryColor.withValues(alpha: 0.7),
             ),
           ),
           onTap: controller.shareApp,
@@ -505,9 +505,9 @@ class SettingsView extends GetView<SettingsController> {
   Widget _buildCopyTile(String title, String value, IconData icon) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 2),
-      leading: Icon(icon, size: AppSizes.iconM, color: Get.theme.primaryColor.withOpacity(0.8)),
+      leading: Icon(icon, size: AppSizes.iconM, color: Get.theme.primaryColor.withValues(alpha: 0.8)),
       title: Text(title, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)),
-      subtitle: Text(value, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey.withOpacity(0.8))),
+      subtitle: Text(value, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey.withValues(alpha: 0.8))),
       trailing: SizedBox(
         width: AppSizes.iconM,
         height: AppSizes.iconM,
@@ -516,7 +516,7 @@ class SettingsView extends GetView<SettingsController> {
           constraints: const BoxConstraints(),
           icon: const Icon(Icons.copy_rounded),
           onPressed: () => controller.copyToClipboard(value),
-          color: Get.theme.primaryColor.withOpacity(0.7),
+          color: Get.theme.primaryColor.withValues(alpha: 0.7),
         ),
       ),
       titleAlignment: ListTileTitleAlignment.center,
@@ -526,9 +526,9 @@ class SettingsView extends GetView<SettingsController> {
   Widget _buildLinkTile(String title, String url, IconData icon) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: 2),
-      leading: Icon(icon, size: AppSizes.iconM, color: Get.theme.primaryColor.withOpacity(0.8)),
+      leading: Icon(icon, size: AppSizes.iconM, color: Get.theme.primaryColor.withValues(alpha: 0.8)),
       title: Text(title, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)),
-      subtitle: Text(url, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey.withOpacity(0.8)), maxLines: 1, overflow: TextOverflow.ellipsis),
+      subtitle: Text(url, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey.withValues(alpha: 0.8)), maxLines: 1, overflow: TextOverflow.ellipsis),
       trailing: SizedBox(
         width: AppSizes.iconM,
         height: AppSizes.iconM,
@@ -537,7 +537,7 @@ class SettingsView extends GetView<SettingsController> {
           constraints: const BoxConstraints(),
           icon: const Icon(Icons.open_in_new_rounded),
           onPressed: () => controller.launchURL(url),
-          color: Get.theme.primaryColor.withOpacity(0.7),
+          color: Get.theme.primaryColor.withValues(alpha: 0.7),
         ),
       ),
       onTap: () => controller.launchURL(url),

@@ -15,7 +15,7 @@ class ResultCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.9),
+            Theme.of(context).primaryColor.withValues(alpha: 0.9),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -23,7 +23,7 @@ class ResultCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSizes.radiusXXL + 4),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.4),
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.4),
             blurRadius: 25,
             offset: const Offset(0, 12),
           ),
@@ -152,12 +152,12 @@ class ResultCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: AppSizes.paddingXXL),
       padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: AppSizes.paddingS + 2),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppSizes.radiusL),
         border: Border.all(color: Colors.white10),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -169,7 +169,7 @@ class ResultCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(AppSizes.paddingXS + 2),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(AppSizes.radiusS),
             ),
             child: Icon(Icons.description_rounded, color: Colors.white, size: AppSizes.fontXS + 4),
@@ -197,7 +197,7 @@ class ResultCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(AppSizes.paddingXL - 2),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.18),
+        color: Colors.black.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(AppSizes.radiusXXL - 2),
         border: Border.all(color: Colors.white12),
       ),
@@ -218,7 +218,7 @@ class ResultCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(AppSizes.paddingS),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.05),
+              color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(10.0),
             ),
             child: Icon(icon, color: Colors.white70, size: AppSizes.iconM - 4),
@@ -266,7 +266,7 @@ class ResultCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: AppSizes.paddingXL, horizontal: AppSizes.paddingS + 2),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.15),
+        color: Colors.black.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSizes.radiusXXL - 2),
         border: Border.all(color: Colors.white10),
       ),
@@ -313,9 +313,9 @@ class ResultCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingS),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.12),
+        color: Colors.black.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSizes.radiusL),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Row(
         children: [

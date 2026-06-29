@@ -107,7 +107,7 @@ class HomeController extends GetxController {
               Container(
                 padding: EdgeInsets.all(AppSizes.paddingL),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.check_circle_rounded, color: Colors.green, size: AppSizes.iconXXL + AppSizes.paddingS),
@@ -125,7 +125,7 @@ class HomeController extends GetxController {
                   border: Border.all(color: AppColors.getCardBorderColor(Get.context!)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -208,7 +208,7 @@ class HomeController extends GetxController {
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: bgColor.withOpacity(0.8),
+      backgroundColor: bgColor.withValues(alpha: 0.8),
       textColor: Colors.white,
       fontSize: AppSizes.fontM,
     );

@@ -78,7 +78,7 @@ class UnequalSplit extends StatelessWidget {
                       ),
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        icon: Icon(Icons.remove_circle_outline, color: Colors.red.withOpacity(0.7), size: AppSizes.iconM),
+                        icon: Icon(Icons.remove_circle_outline, color: Colors.red.withValues(alpha: 0.7), size: AppSizes.iconM),
                         onPressed: () => controller.removePerson(index),
                       ),
                     ],

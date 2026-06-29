@@ -103,7 +103,7 @@ class PeopleCounter extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(AppSizes.paddingM),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppSizes.radiusM),
           border: Border.all(color: Theme.of(context).primaryColor, width: 1),
         ),

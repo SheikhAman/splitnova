@@ -17,7 +17,7 @@ class AppTheme {
     // Improved contrast for input fields
     final inputFill = isDarkMode ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDarkMode ? Colors.white : const Color(0xFF0F172A);
-    final hintColor = isDarkMode ? Colors.white.withOpacity(0.4) : Colors.black38;
+    final hintColor = isDarkMode ? Colors.white.withValues(alpha: 0.4) : Colors.black38;
 
     return ThemeData(
       useMaterial3: true,
@@ -29,13 +29,13 @@ class AppTheme {
       colorScheme: isDarkMode 
         ? ColorScheme.dark(
             primary: primaryColor,
-            secondary: primaryColor.withOpacity(0.8),
+            secondary: primaryColor.withValues(alpha: 0.8),
             surface: cardBackground,
             onSurface: Colors.white,
           )
         : ColorScheme.light(
             primary: primaryColor,
-            secondary: primaryColor.withOpacity(0.8),
+            secondary: primaryColor.withValues(alpha: 0.8),
             surface: Colors.white,
             onSurface: const Color(0xFF0F172A),
           ),
@@ -50,7 +50,7 @@ class AppTheme {
       ),
       textSelectionTheme: TextSelectionThemeData(
         cursorColor: primaryColor,
-        selectionColor: primaryColor.withOpacity(0.3),
+        selectionColor: primaryColor.withValues(alpha: 0.3),
         selectionHandleColor: primaryColor,
       ),
       inputDecorationTheme: InputDecorationTheme(

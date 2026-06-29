@@ -35,7 +35,7 @@ class SplashView extends GetView<SplashController> {
                 Container(
                   padding: const EdgeInsets.all(22.0),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset(

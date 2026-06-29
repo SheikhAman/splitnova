@@ -93,7 +93,7 @@ class SupportView extends GetView<SupportController> {
         SizedBox(height: AppSizes.paddingM),
         Card(
           elevation: 0,
-          color: Theme.of(context).cardColor.withOpacity(0.5),
+          color: Theme.of(context).cardColor.withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.radiusL),
             side: BorderSide(color: AppColors.getCardBorderColor(context)),
@@ -123,7 +123,7 @@ class SupportView extends GetView<SupportController> {
 
   Widget _buildLinkTile(BuildContext context, String label, String value, IconData icon) {
     return ListTile(
-      leading: Icon(icon, size: AppSizes.iconM, color: Theme.of(context).primaryColor.withOpacity(0.7)),
+      leading: Icon(icon, size: AppSizes.iconM, color: Theme.of(context).primaryColor.withValues(alpha: 0.7)),
       title: Text(label, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: FontWeight.w500)),
       trailing: Icon(Icons.arrow_forward_ios_rounded, size: AppSizes.fontS + 2, color: Colors.grey),
       onTap: () => controller.launchURL(value),
