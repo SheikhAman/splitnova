@@ -65,12 +65,24 @@ class TipController extends GetxController {
 
   final Map<String, String> currencies = {
     'USD': '\$',
-    'BDT': '৳',
     'EUR': '€',
     'GBP': '£',
     'INR': '₹',
+    'JPY': '¥',
+    'CNY': '¥',
+    'KRW': '₩',
+    'VND': '₫',
+    'THB': '฿',
+    'IDR': 'Rp',
+    'MYR': 'RM',
+    'PHP': '₱',
+    'SGD': 'S\$',
+    'BDT': '৳',
     'SAR': '﷼',
     'AED': 'د.إ',
+    'PKR': '₨',
+    'LKR': 'Rs',
+    'NPR': '₨',
   };
 
   void updateCurrency(String code) {

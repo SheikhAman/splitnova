@@ -108,6 +108,8 @@ class HistoryView extends GetView<HistoryController> {
                                 item['currency']
                               ),
                               style: TextStyle(fontWeight: FontWeight.w900, fontSize: AppSizes.fontXL),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             if (item['reason'] != null && (item['reason'] as String).isNotEmpty)
                               Padding(
@@ -188,13 +190,21 @@ class HistoryView extends GetView<HistoryController> {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.person_outline, size: AppSizes.fontM, color: Colors.grey),
-                                            SizedBox(width: AppSizes.paddingS),
-                                            Text(p['name'], style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.w500)),
-                                          ],
-                                        ),
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.person_outline, size: AppSizes.fontM, color: Colors.grey),
+                                    SizedBox(width: AppSizes.paddingS),
+                                    Expanded(
+                                      child: Text(
+                                        p['name'],
+                                        style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.w500),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                                         Column(
                                           crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [
@@ -211,22 +221,56 @@ class HistoryView extends GetView<HistoryController> {
                           ],
                           SizedBox(height: AppSizes.paddingL),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              _buildActionIcon(context, Icons.edit_outlined, 'edit'.tr, Colors.orange, () => controller.loadItemToCalculator(item)),
-                              _buildActionIcon(context, Icons.share_outlined, 'share'.tr, Colors.green, () {
-                                final msg = controller.getHistoryShareMessage(item);
-                                tipController.shareToWhatsApp(msg);
-                              }),
-                              _buildActionIcon(context, Icons.content_copy_outlined, 'copy'.tr, Colors.teal, () {
-                                final msg = controller.getHistoryShareMessage(item);
-                                Clipboard.setData(ClipboardData(text: msg));
-                                _showToast('success'.tr, 'copied_to_clipboard'.tr);
-                              }),
-                              _buildActionIcon(context, Icons.qr_code_2_outlined, 'qr'.tr, Colors.purple, () {
-                                final msg = controller.getHistoryShareMessage(item);
-                                _showQRCodeBottomSheet(context, msg);
-                              }),
+                              Expanded(
+                                child: _buildActionIcon(
+                                  context,
+                                  Icons.edit_outlined,
+                                  'edit'.tr,
+                                  Colors.orange,
+                                  () => controller.loadItemToCalculator(item),
+                                ),
+                              ),
+                              SizedBox(width: AppSizes.paddingS),
+                              Expanded(
+                                child: _buildActionIcon(
+                                  context,
+                                  Icons.share_outlined,
+                                  'share'.tr,
+                                  Colors.green,
+                                  () {
+                                    final msg = controller.getHistoryShareMessage(item);
+                                    tipController.shareToWhatsApp(msg);
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: AppSizes.paddingS),
+                              Expanded(
+                                child: _buildActionIcon(
+                                  context,
+                                  Icons.content_copy_outlined,
+                                  'copy'.tr,
+                                  Colors.teal,
+                                  () {
+                                    final msg = controller.getHistoryShareMessage(item);
+                                    Clipboard.setData(ClipboardData(text: msg));
+                                    _showToast('success'.tr, 'copied_to_clipboard'.tr);
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: AppSizes.paddingS),
+                              Expanded(
+                                child: _buildActionIcon(
+                                  context,
+                                  Icons.qr_code_2_outlined,
+                                  'qr'.tr,
+                                  Colors.purple,
+                                  () {
+                                    final msg = controller.getHistoryShareMessage(item);
+                                    _showQRCodeBottomSheet(context, msg);
+                                  },
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -259,8 +303,22 @@ class HistoryView extends GetView<HistoryController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontSize: AppSizes.fontXS, color: Colors.grey)),
-        Text(value, style: TextStyle(fontSize: AppSizes.fontM, fontWeight: isBold ? FontWeight.bold : FontWeight.normal, color: isBold ? Theme.of(context).primaryColor : null)),
+        Text(
+          label,
+          style: TextStyle(fontSize: AppSizes.fontXS, color: Colors.grey),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: AppSizes.fontM,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: isBold ? Theme.of(context).primaryColor : null,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ],
     );
   }
@@ -270,7 +328,8 @@ class HistoryView extends GetView<HistoryController> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSizes.radiusM),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingM, vertical: AppSizes.paddingS),
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: AppSizes.paddingS, horizontal: AppSizes.paddingXS),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(AppSizes.radiusM),
@@ -280,7 +339,18 @@ class HistoryView extends GetView<HistoryController> {
           children: [
             Icon(icon, color: color, size: AppSizes.iconM),
             SizedBox(height: AppSizes.paddingXS),
-            Text(label, style: TextStyle(fontSize: AppSizes.fontXS, color: color, fontWeight: FontWeight.bold)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: AppSizes.fontXS,
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
       ),

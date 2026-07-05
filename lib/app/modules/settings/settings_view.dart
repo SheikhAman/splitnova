@@ -205,6 +205,21 @@ class SettingsView extends GetView<SettingsController> {
           ),
           Divider(indent: 56.0, endIndent: AppSizes.paddingL, height: 1),
           ListTile(
+            leading: _buildIconContainer(context, Icons.currency_exchange_rounded),
+            title: Text('default_currency'.tr, style: TextStyle(fontSize: AppSizes.fontL, fontWeight: FontWeight.w500)),
+            trailing: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: controller.tipController.selectedCurrency.value,
+                onChanged: (val) => controller.updateDefaultCurrency(val!),
+                icon: Icon(Icons.keyboard_arrow_down, color: Get.theme.primaryColor),
+                style: TextStyle(color: Get.theme.primaryColor, fontWeight: FontWeight.bold, fontSize: AppSizes.fontM),
+                items: controller.tipController.currencies.keys
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+              ),
+            ),
+          ),
+          ListTile(
             leading: _buildIconContainer(context, Icons.language_outlined),
             title: Text('language'.tr, style: TextStyle(fontSize: AppSizes.fontL, fontWeight: FontWeight.w500)),
             trailing: Container(
@@ -213,12 +228,12 @@ class SettingsView extends GetView<SettingsController> {
                 color: AppColors.getPrimaryLight(context),
                 borderRadius: BorderRadius.circular(AppSizes.radiusS),
               ),
-              child: Text(
-                lang.currentLanguage.value == 'en' ? 'English' : 'বাংলা',
+              child: Obx(() => Text(
+                lang.languages[lang.currentLanguage.value]?['name'] ?? 'English',
                 style: TextStyle(color: Get.theme.primaryColor, fontWeight: FontWeight.bold, fontSize: AppSizes.fontS),
-              ),
+              )),
             ),
-            onTap: lang.toggleLanguage,
+            onTap: () => _showLanguageSelector(context, lang),
           ),
         ],
       ),
@@ -250,6 +265,21 @@ class SettingsView extends GetView<SettingsController> {
             ),
           ),
           Divider(indent: 56.0, endIndent: AppSizes.paddingL, height: 1),
+          ListTile(
+            leading: _buildIconContainer(context, Icons.currency_exchange_rounded),
+            title: Text('default_currency'.tr, style: TextStyle(fontSize: AppSizes.fontL, fontWeight: FontWeight.w500)),
+            trailing: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: controller.tipController.selectedCurrency.value,
+                onChanged: (val) => controller.updateDefaultCurrency(val!),
+                icon: Icon(Icons.keyboard_arrow_down, color: Get.theme.primaryColor),
+                style: TextStyle(color: Get.theme.primaryColor, fontWeight: FontWeight.bold, fontSize: AppSizes.fontM),
+                items: controller.tipController.currencies.keys
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+              ),
+            ),
+          ),
           ListTile(
             leading: _buildIconContainer(context, Icons.people_outline),
             title: Text('default_people'.tr, style: TextStyle(fontSize: AppSizes.fontL, fontWeight: FontWeight.w500)),
@@ -558,6 +588,53 @@ class SettingsView extends GetView<SettingsController> {
         BottomNavigationBarItem(icon: const Icon(Icons.history), label: 'history'.tr),
         BottomNavigationBarItem(icon: const Icon(Icons.settings), label: 'settings'.tr),
       ],
+    );
+  }
+
+  void _showLanguageSelector(BuildContext context, LanguageController lang) {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.all(AppSizes.paddingL),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.radiusXL)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: EdgeInsets.only(bottom: AppSizes.paddingL),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            Text('language'.tr, style: TextStyle(fontSize: AppSizes.fontXL, fontWeight: FontWeight.bold)),
+            SizedBox(height: AppSizes.paddingL),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: lang.languages.length,
+                itemBuilder: (context, index) {
+                  String code = lang.languages.keys.elementAt(index);
+                  var data = lang.languages[code]!;
+                  return ListTile(
+                    leading: Text(data['flag']!, style: const TextStyle(fontSize: 24)),
+                    title: Text(data['name']!, style: TextStyle(fontSize: AppSizes.fontL, fontWeight: FontWeight.w500)),
+                    trailing: lang.currentLanguage.value == code ? Icon(Icons.check_circle, color: Theme.of(context).primaryColor) : null,
+                    onTap: () {
+                      lang.changeLanguage(code);
+                      Get.back();
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
