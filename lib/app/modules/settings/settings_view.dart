@@ -54,7 +54,7 @@ class SettingsView extends GetView<SettingsController> {
                     spacing: 12,
                     runSpacing: 12,
                     children: themeController.colorPalette.map((color) {
-                      final isSelected = themeController.primaryColor.value.value == color.value;
+                      final isSelected = themeController.primaryColor.value.toARGB32() == color.toARGB32();
                       return GestureDetector(
                         onTap: () => themeController.setPrimaryColor(color),
                         child: Container(

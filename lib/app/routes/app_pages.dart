@@ -8,6 +8,8 @@ import '../modules/settings/settings_binding.dart';
 import '../modules/settings/settings_view.dart';
 import '../modules/splash/splash_binding.dart';
 import '../modules/splash/splash_view.dart';
+import '../modules/trip_summary/bindings/trip_summary_binding.dart';
+import '../modules/trip_summary/views/trip_summary_view.dart';
 
 part 'app_routes.dart';
 
@@ -36,6 +38,11 @@ class AppPages {
       name: _Paths.SETTINGS,
       page: () => const SettingsView(),
       binding: SettingsBinding(),
+    ),
+    GetPage(
+      name: _Paths.TRIP_SUMMARY,
+      page: () => const TripSummaryView(),
+      binding: TripSummaryBinding(),
     ),
   ];
 }

@@ -2,369 +2,385 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:screenshot/screenshot.dart';
 import '../../core/values/app_constants.dart';
 import 'history_controller.dart';
-import '../../controllers/tip_controller.dart';
+import '../../controllers/trip_controller.dart';
+import 'widgets/history_list_item.dart';
+import 'widgets/trip_list_item.dart';
+import '../../data/models/history_model.dart';
+import '../../data/models/trip_model.dart';
 
 class HistoryView extends GetView<HistoryController> {
   const HistoryView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('history'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: () => _showClearAllDialog(context),
-          ),
-        ],
-      ),
-      body: Obx(() {
-        final list = controller.historyList;
-        if (list.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.history, size: AppSizes.iconXXL * 2, color: Colors.grey.withValues(alpha: 0.5)),
-                SizedBox(height: AppSizes.paddingL),
-                Text('no_history'.tr, style: TextStyle(fontSize: AppSizes.fontL, color: Colors.grey)),
-              ],
-            ),
-          );
-        }
-        return ListView.builder(
-          padding: EdgeInsets.all(AppSizes.paddingL),
-          itemCount: list.length,
-          itemBuilder: (context, index) {
-            final item = list[index];
-            final DateTime date = DateTime.parse(item['date']);
-            final tipController = Get.find<TipController>();
-
-            return Dismissible(
-              key: Key('${item['id']}_$index'),
-              direction: DismissDirection.endToStart,
-              confirmDismiss: (direction) async {
-                return await Get.dialog<bool>(
-                  AlertDialog(
-                    title: Text('delete_item'.tr),
-                    content: Text('are_you_sure'.tr),
-                    actions: [
-                      TextButton(onPressed: () => Get.back(result: false), child: Text('cancel'.tr)),
-                      TextButton(
-                        onPressed: () => Get.back(result: true),
-                        child: Text('delete'.tr, style: const TextStyle(color: Colors.red)),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              onDismissed: (_) => controller.deleteItem(index),
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: EdgeInsets.only(right: AppSizes.paddingXL),
-                margin: EdgeInsets.only(bottom: AppSizes.paddingM),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                ),
-                child: const Icon(Icons.delete, color: Colors.white),
-              ),
-              child: Card(
-                margin: EdgeInsets.only(bottom: AppSizes.paddingM),
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(AppSizes.radiusL),
-                  side: BorderSide(color: AppColors.getCardBorderColor(context)),
-                ),
-                child: ExpansionTile(
-                  shape: const RoundedRectangleBorder(side: BorderSide.none),
-                  collapsedShape: const RoundedRectangleBorder(side: BorderSide.none),
-                  tilePadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: AppSizes.paddingS),
-                  leading: Container(
-                    padding: EdgeInsets.all(AppSizes.paddingS),
-                    decoration: BoxDecoration(
-                      color: AppColors.getPrimaryLight(context),
-                      borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                    ),
-                    child: Icon(Icons.receipt_long, color: Theme.of(context).primaryColor, size: AppSizes.iconL),
-                  ),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tipController.formatMoney(
-                                ((item['bill'] as num) + (item['tipAmount'] as num)).toDouble(), 
-                                item['currency']
-                              ),
-                              style: TextStyle(fontWeight: FontWeight.w900, fontSize: AppSizes.fontXL),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (item['reason'] != null && (item['reason'] as String).isNotEmpty)
-                              Padding(
-                                padding: EdgeInsets.only(top: AppSizes.paddingXS / 2),
-                                child: Text(
-                                  item['reason'],
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: AppSizes.fontS, 
-                                    color: Theme.of(context).primaryColor,
-                                    fontWeight: FontWeight.w500
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingS, vertical: AppSizes.paddingXS),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(AppSizes.radiusS),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.people_outline, size: AppSizes.fontM, color: Colors.grey[600]),
-                            SizedBox(width: AppSizes.paddingXS),
-                            Text(
-                              '${item['people']}',
-                              style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.bold, color: Colors.grey[700]),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    DateFormat('MMM dd, yyyy • hh:mm a').format(date),
-                    style: TextStyle(fontSize: AppSizes.fontXS, color: Colors.grey),
-                  ),
+    return DefaultTabController(
+      length: 2,
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          if (controller.isSelectionMode.value) {
+            controller.toggleSelectionMode();
+          } else {
+            Get.back();
+          }
+        },
+        child: Scaffold(
+          appBar: _buildAppBar(context),
+          body: Column(
+            children: [
+              _buildSuggestionBanner(),
+              Expanded(
+                child: TabBarView(
                   children: [
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(AppSizes.paddingL, 0, AppSizes.paddingL, AppSizes.paddingL),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Divider(),
-                          SizedBox(height: AppSizes.paddingS),
-                          GridView.count(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisCount: 2,
-                            childAspectRatio: 2.5,
-                            children: [
-                              _buildInfoRow(context, 'bill_amount'.tr, tipController.formatMoney((item['bill'] as num).toDouble(), item['currency'])),
-                              _buildInfoRow(context, 'tip_amount'.tr, tipController.formatMoney((item['tipAmount'] as num).toDouble(), item['currency'])),
-                              _buildInfoRow(context, 'total_amount'.tr, tipController.formatMoney(((item['bill'] as num) + (item['tipAmount'] as num)).toDouble(), item['currency']), isBold: true),
-                              _buildInfoRow(context, 'per_person'.tr, tipController.formatMoney((item['totalPerPerson'] as num).toDouble(), item['currency']), isBold: true),
-                            ],
-                          ),
-                          if (item['isCustomSplit'] == true && item['peopleList'] != null) ...[
-                            SizedBox(height: AppSizes.paddingM),
-                            Text('people_details'.tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSizes.fontM)),
-                            SizedBox(height: AppSizes.paddingS),
-                            Container(
-                              padding: EdgeInsets.all(AppSizes.paddingM),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.withValues(alpha: 0.05),
-                                borderRadius: BorderRadius.circular(AppSizes.radiusM),
-                              ),
-                              child: Column(
-                                children: (item['peopleList'] as List).map((p) {
-                                  double amount = ((item['bill'] as num).toDouble() + (item['tipAmount'] as num).toDouble()) * ((p['percentage'] as num).toDouble() / 100);
-                                  return Padding(
-                                    padding: EdgeInsets.symmetric(vertical: AppSizes.paddingXS),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.person_outline, size: AppSizes.fontM, color: Colors.grey),
-                                    SizedBox(width: AppSizes.paddingS),
-                                    Expanded(
-                                      child: Text(
-                                        p['name'],
-                                        style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.w500),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                                        Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            Text(tipController.formatMoney(amount, item['currency']), style: TextStyle(fontSize: AppSizes.fontS, fontWeight: FontWeight.bold)),
-                                            Text('${p['percentage']}%', style: TextStyle(fontSize: AppSizes.fontXS, color: Colors.grey)),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ],
-                          SizedBox(height: AppSizes.paddingL),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildActionIcon(
-                                  context,
-                                  Icons.edit_outlined,
-                                  'edit'.tr,
-                                  Colors.orange,
-                                  () => controller.loadItemToCalculator(item),
-                                ),
-                              ),
-                              SizedBox(width: AppSizes.paddingS),
-                              Expanded(
-                                child: _buildActionIcon(
-                                  context,
-                                  Icons.share_outlined,
-                                  'share'.tr,
-                                  Colors.green,
-                                  () {
-                                    final msg = controller.getHistoryShareMessage(item);
-                                    tipController.shareToWhatsApp(msg);
-                                  },
-                                ),
-                              ),
-                              SizedBox(width: AppSizes.paddingS),
-                              Expanded(
-                                child: _buildActionIcon(
-                                  context,
-                                  Icons.content_copy_outlined,
-                                  'copy'.tr,
-                                  Colors.teal,
-                                  () {
-                                    final msg = controller.getHistoryShareMessage(item);
-                                    Clipboard.setData(ClipboardData(text: msg));
-                                    _showToast('success'.tr, 'copied_to_clipboard'.tr);
-                                  },
-                                ),
-                              ),
-                              SizedBox(width: AppSizes.paddingS),
-                              Expanded(
-                                child: _buildActionIcon(
-                                  context,
-                                  Icons.qr_code_2_outlined,
-                                  'qr'.tr,
-                                  Colors.purple,
-                                  () {
-                                    final msg = controller.getHistoryShareMessage(item);
-                                    _showQRCodeBottomSheet(context, msg);
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildBillsList(context),
+                    _buildTripsList(context),
                   ],
                 ),
               ),
-            );
-          },
-        );
-      }),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 1,
-        onTap: (index) {
-          if (index == 0) Get.offAllNamed('/home');
-          if (index == 2) Get.offAllNamed('/settings');
-        },
-        selectedItemColor: Theme.of(context).primaryColor,
-        items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.calculate), label: 'calculator'.tr),
-          BottomNavigationBarItem(icon: const Icon(Icons.history), label: 'history'.tr),
-          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: 'settings'.tr),
-        ],
+            ],
+          ),
+          floatingActionButton: _buildFloatingActionButton(context),
+        ),
       ),
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, String label, String value, {bool isBold = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: AppSizes.fontXS, color: Colors.grey),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: AppSizes.fontM,
-            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-            color: isBold ? Theme.of(context).primaryColor : null,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      title: Obx(() => Text(
+            controller.isSelectionMode.value
+                ? '${controller.selectedIds.length} ${'selected'.tr}'
+                : 'history'.tr,
+          )),
+      bottom: TabBar(
+        tabs: [
+          Tab(text: 'bills'.tr),
+          Tab(text: 'trips'.tr),
+        ],
+      ),
+      actions: [
+        Obx(() {
+          if (controller.isSelectionMode.value) {
+            return Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.group_add_outlined),
+                  onPressed: () => _showCreateTripDialog(context),
+                  tooltip: 'create_trip'.tr,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () => _showDeleteConfirmation(context),
+                  tooltip: 'delete_selected'.tr,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => controller.toggleSelectionMode(),
+                ),
+              ],
+            );
+          }
+          return IconButton(
+            icon: const Icon(Icons.select_all),
+            onPressed: () => controller.toggleSelectionMode(),
+            tooltip: 'selection_mode'.tr,
+          );
+        }),
       ],
     );
   }
 
-  Widget _buildActionIcon(BuildContext context, IconData icon, String label, Color color, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSizes.radiusM),
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: AppSizes.paddingS, horizontal: AppSizes.paddingXS),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(AppSizes.radiusM),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+  Widget _buildSuggestionBanner() {
+    return Obx(() {
+      if (controller.suggestionIds.isEmpty) return const SizedBox.shrink();
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: Colors.blue.withValues(alpha: 0.1),
+        child: Row(
           children: [
-            Icon(icon, color: color, size: AppSizes.iconM),
-            SizedBox(height: AppSizes.paddingXS),
-            FittedBox(
-              fit: BoxFit.scaleDown,
+            const Icon(Icons.lightbulb_outline, color: Colors.blue),
+            const SizedBox(width: 12),
+            Expanded(
               child: Text(
-                label,
-                maxLines: 1,
-                style: TextStyle(
-                  fontSize: AppSizes.fontXS,
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+                'group_suggestion_text'.trParams({
+                  'n': controller.suggestionIds.length.toString(),
+                }),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
               ),
+            ),
+            TextButton(
+              onPressed: () => controller.groupSuggested(),
+              child: Text('group'.tr),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close, size: 20),
+              onPressed: () => controller.dismissSuggestion(),
             ),
           ],
         ),
+      );
+    });
+  }
+
+  Widget _buildBillsList(BuildContext context) {
+    final tripController = Get.find<TripController>();
+    return Obx(() {
+      final bills = controller.historyList;
+      final trips = tripController.trips;
+      
+      if (bills.isEmpty && trips.isEmpty) {
+        return _buildEmptyState(Icons.history, 'no_history'.tr);
+      }
+      
+      final List<dynamic> combinedList = [...trips, ...bills];
+      
+      return ListView.builder(
+        padding: EdgeInsets.all(AppSizes.paddingL),
+        itemCount: combinedList.length,
+        itemBuilder: (context, index) {
+          final item = combinedList[index];
+          
+          if (item is TripModel) {
+            return TripListItem(
+              trip: item,
+              controller: controller,
+            );
+          }
+          
+          final itemMap = item as Map<String, dynamic>;
+          final historyItem = HistoryItem.fromMap(itemMap);
+          return HistoryListItem(
+            item: historyItem,
+            controller: controller,
+            onShowQRCode: () => _showQRCodeBottomSheet(context, controller.getHistoryShareMessage(historyItem)),
+            onShowToast: (msg) => _showToast(msg),
+          );
+        },
+      );
+    });
+  }
+
+  Widget _buildTripsList(BuildContext context) {
+    final tripController = Get.find<TripController>();
+    return Obx(() {
+      final list = tripController.trips;
+      if (list.isEmpty) {
+        return _buildEmptyState(Icons.card_travel, 'no_trips'.tr);
+      }
+      return ListView.builder(
+        padding: EdgeInsets.all(AppSizes.paddingL),
+        itemCount: list.length,
+        itemBuilder: (context, index) {
+          final trip = list[index];
+          return TripListItem(
+            trip: trip,
+            controller: controller,
+          );
+        },
+      );
+    });
+  }
+
+  Widget _buildEmptyState(IconData icon, String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: AppSizes.iconXXL * 2, color: Colors.grey.withValues(alpha: 0.5)),
+          SizedBox(height: AppSizes.paddingL),
+          Text(message, style: TextStyle(fontSize: AppSizes.fontL, color: Colors.grey)),
+        ],
       ),
     );
   }
 
-  void _showToast(String title, String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.black.withValues(alpha: 0.8),
-      textColor: Colors.white,
-      fontSize: AppSizes.fontM,
+  Widget? _buildFloatingActionButton(BuildContext context) {
+    return Obx(() {
+      if (controller.historyList.isNotEmpty && !controller.isSelectionMode.value) {
+        return FloatingActionButton.extended(
+          onPressed: () => _showClearAllConfirmation(context),
+          label: Text('clear_all'.tr),
+          icon: const Icon(Icons.delete_sweep_outlined),
+          backgroundColor: Colors.red,
+        );
+      }
+      return const SizedBox.shrink();
+    });
+  }
+
+  void _showCreateTripDialog(BuildContext context) {
+    if (controller.selectedIds.length < 2) {
+      Get.snackbar(
+        'error'.tr,
+        'select_at_least_two_bills'.tr,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final TextEditingController nameController = TextEditingController();
+    final tripController = Get.find<TripController>();
+    
+    RxString selectedEmoji = '✈️'.obs;
+    RxInt selectedColor = Colors.orange.toARGB32().obs;
+
+    final List<String> emojis = ['✈️', '🍕', '🚗', '🏨', '🛍️', '🏖️', '⛰️', '🎉', '☕', '🍜'];
+    final List<Color> colors = [
+      Colors.orange,
+      Colors.blue,
+      Colors.green,
+      Colors.red,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.indigo,
+      Colors.amber,
+      Colors.deepOrange,
+    ];
+
+    Get.dialog(
+      AlertDialog(
+        title: Text('create_trip'.tr),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  hintText: 'trip_name_hint'.tr,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+                ),
+                autofocus: true,
+              ),
+              SizedBox(height: AppSizes.paddingL),
+              Text('select_emoji'.tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSizes.fontM)),
+              SizedBox(height: AppSizes.paddingS),
+              SizedBox(
+                height: 50,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: emojis.length,
+                  itemBuilder: (context, index) {
+                    return Obx(() => GestureDetector(
+                      onTap: () => selectedEmoji.value = emojis[index],
+                      child: Container(
+                        margin: EdgeInsets.only(right: AppSizes.paddingS),
+                        padding: EdgeInsets.all(AppSizes.paddingS),
+                        decoration: BoxDecoration(
+                          color: selectedEmoji.value == emojis[index] ? AppColors.getPrimaryLight(context) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(AppSizes.radiusS),
+                          border: Border.all(
+                            color: selectedEmoji.value == emojis[index] ? Theme.of(context).primaryColor : Colors.grey.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Text(emojis[index], style: TextStyle(fontSize: AppSizes.iconM)),
+                      ),
+                    ));
+                  },
+                ),
+              ),
+              SizedBox(height: AppSizes.paddingL),
+              Text('select_color'.tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSizes.fontM)),
+              SizedBox(height: AppSizes.paddingS),
+              SizedBox(
+                height: 40,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: colors.length,
+                  itemBuilder: (context, index) {
+                    return Obx(() => GestureDetector(
+                      onTap: () => selectedColor.value = colors[index].toARGB32(),
+                      child: Container(
+                        width: 40,
+                        margin: EdgeInsets.only(right: AppSizes.paddingS),
+                        decoration: BoxDecoration(
+                          color: colors[index],
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: selectedColor.value == colors[index].toARGB32() ? Colors.white : Colors.transparent,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            if (selectedColor.value == colors[index].toARGB32())
+                              BoxShadow(color: colors[index].withValues(alpha: 0.4), blurRadius: 4, spreadRadius: 1),
+                          ],
+                        ),
+                        child: selectedColor.value == colors[index].toARGB32()
+                          ? const Icon(Icons.check, color: Colors.white, size: 20)
+                          : null,
+                      ),
+                    ));
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                tripController.createTrip(
+                  nameController.text,
+                  controller.selectedIds.toList(),
+                  emoji: selectedEmoji.value,
+                  colorValue: selectedColor.value,
+                );
+                controller.toggleSelectionMode();
+                Get.back();
+              }
+            },
+            child: Text('create'.tr),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('delete_selected'.tr),
+        content: Text('delete_selected_confirm'.tr),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
+          TextButton(
+            onPressed: () {
+              controller.deleteSelectedItems();
+              Get.back();
+            },
+            child: Text('delete'.tr, style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearAllConfirmation(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('clear_history'.tr),
+        content: Text('clear_history_confirm'.tr),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
+          TextButton(
+            onPressed: () {
+              controller.clearAllHistory();
+              Get.back();
+            },
+            child: Text('clear'.tr, style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -383,7 +399,7 @@ class HistoryView extends GetView<HistoryController> {
             children: [
               Container(
                 width: AppSizes.iconXXL,
-                height: 4.0, // Fixed small height for handle
+                height: 4.0,
                 margin: EdgeInsets.only(bottom: AppSizes.paddingXL),
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
@@ -410,7 +426,7 @@ class HistoryView extends GetView<HistoryController> {
                   child: QrImageView(
                     data: data,
                     version: QrVersions.auto,
-                    size: 200.0, // Fixed size for QR
+                    size: 200.0,
                     backgroundColor: Colors.white,
                   ),
                 ),
@@ -418,33 +434,17 @@ class HistoryView extends GetView<HistoryController> {
               SizedBox(height: AppSizes.paddingL),
               Text('scan_me'.tr, style: TextStyle(fontSize: AppSizes.fontM, color: Colors.grey)),
               SizedBox(height: AppSizes.paddingXXL),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => controller.shareQRCode(),
-                      icon: const Icon(Icons.share),
-                      label: Text('share'.tr),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: Size(0, 48.0),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
-                      ),
-                    ),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => controller.shareQRCode(),
+                  icon: const Icon(Icons.share_outlined),
+                  label: Text('share_qr'.tr),
+                  style: ElevatedButton.styleFrom(
+                    padding: EdgeInsets.all(AppSizes.paddingL),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
                   ),
-                  SizedBox(width: AppSizes.paddingM),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Get.back(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        minimumSize: Size(0, 48.0),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
-                        elevation: 0,
-                      ),
-                      child: Text('close'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -453,22 +453,14 @@ class HistoryView extends GetView<HistoryController> {
     );
   }
 
-  void _showClearAllDialog(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        title: Text('clear_history'.tr),
-        content: Text('are_you_sure'.tr),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
-          TextButton(
-            onPressed: () {
-              controller.clearAllHistory();
-              Get.back();
-            },
-            child: Text('delete'.tr, style: const TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+  void _showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.black.withValues(alpha: 0.8),
+      textColor: Colors.white,
+      fontSize: AppSizes.fontM,
     );
   }
 }

@@ -7,7 +7,9 @@ import 'app/routes/app_pages.dart';
 import 'app/controllers/theme_controller.dart';
 import 'app/controllers/language_controller.dart';
 import 'app/controllers/tip_controller.dart';
+import 'app/controllers/trip_controller.dart';
 import 'app/services/firebase_service.dart';
+
 import 'translations/app_translations.dart';
 
 void main() async {
@@ -24,6 +26,7 @@ void main() async {
   Get.put(ThemeController(), permanent: true);
   Get.put(LanguageController(), permanent: true);
   Get.put(TipController(), permanent: true);
+  Get.put(TripController(), permanent: true);
 
   // Lock orientation to portrait
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
