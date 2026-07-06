@@ -16,6 +16,7 @@ class SettingsView extends GetView<SettingsController> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, // Remove back button in shell
         title: Text('settings'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: Obx(() {
@@ -100,7 +101,6 @@ class SettingsView extends GetView<SettingsController> {
           ],
         );
       }),
-      bottomNavigationBar: _buildBottomNav(context),
     );
   }
 
@@ -575,21 +575,6 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildBottomNav(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: 2,
-      onTap: (index) {
-        if (index == 0) Get.offAllNamed('/home');
-        if (index == 1) Get.offAllNamed('/history');
-      },
-      selectedItemColor: Theme.of(context).primaryColor,
-      items: [
-        BottomNavigationBarItem(icon: const Icon(Icons.calculate), label: 'calculator'.tr),
-        BottomNavigationBarItem(icon: const Icon(Icons.history), label: 'history'.tr),
-        BottomNavigationBarItem(icon: const Icon(Icons.settings), label: 'settings'.tr),
-      ],
-    );
-  }
 
   void _showLanguageSelector(BuildContext context, LanguageController lang) {
     Get.bottomSheet(

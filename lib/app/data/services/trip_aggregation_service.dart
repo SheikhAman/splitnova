@@ -70,22 +70,19 @@ class TripAggregationService {
           personMap[currency]![normalized]!.total += personTotal;
         }
       } else {
-        // Equal split. If people list is missing, we might not have names.
-        // The current app design for equal split doesn't seem to store names in history unless custom.
-        // However, requirements say "merge people entries". 
-        // If equal split, we usually just have a count `people`.
-        // If the app doesn't have names for equal splits, we can't aggregate them by name.
-        // Assuming for now we only aggregate if names are available.
-        if (item.peopleList != null) {
-           for (var p in item.peopleList!) {
-            final normalized = p.name.trim().toLowerCase();
-            final personTotal = totalBill * (p.percentage / 100);
-            
-            if (!personMap[currency]!.containsKey(normalized)) {
-              personMap[currency]![normalized] = _PersonAccumulator(p.name.trim(), 0);
-            }
-            personMap[currency]![normalized]!.total += personTotal;
-          }
+        // Equal split logic: If no names, use "Anonymous" or similar.
+        // However, if we want to support professional reporting, we should try to associate 
+        // these amounts with a generic "Participant" bucket if specific names aren't provided.
+        final personTotal = totalBill / item.people;
+        final name = "Participant";
+        final normalized = name.toLowerCase();
+
+        for (int i = 0; i < item.people; i++) {
+           final key = "$normalized-${i+1}"; // Distinguish participants
+           if (!personMap[currency]!.containsKey(key)) {
+             personMap[currency]![key] = _PersonAccumulator("Participant ${i+1}", 0);
+           }
+           personMap[currency]![key]!.total += personTotal;
         }
       }
     }

@@ -48,47 +48,56 @@ class HistoryListItem extends StatelessWidget {
                   width: isSelected ? 2 : 1,
                 ),
               ),
-              child: ExpansionTile(
-                // Use a very specific key to avoid collision with scrollable children state
-                key: PageStorageKey('history_tile_v5_${item.id}'),
-                maintainState: true,
-                enabled: !controller.isSelectionMode.value,
-                shape: const RoundedRectangleBorder(side: BorderSide.none),
-                collapsedShape: const RoundedRectangleBorder(side: BorderSide.none),
-                tilePadding: EdgeInsets.symmetric(
-                    horizontal: AppSizes.paddingL, vertical: AppSizes.paddingS),
-                leading: Container(
-                  padding: EdgeInsets.all(AppSizes.paddingS),
-                  decoration: BoxDecoration(
-                    color: AppColors.getPrimaryLight(context),
-                    borderRadius: BorderRadius.circular(AppSizes.radiusM),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  dividerColor: Colors.transparent,
+                  expansionTileTheme: const ExpansionTileThemeData(
+                    shape: RoundedRectangleBorder(side: BorderSide.none),
+                    collapsedShape: RoundedRectangleBorder(side: BorderSide.none),
                   ),
-                  child: Icon(Icons.receipt_long,
-                      color: Theme.of(context).primaryColor, size: AppSizes.iconL),
                 ),
-                title: _buildTitle(context, tipController),
-                subtitle: Text(
-                  DateFormat('MMM dd, yyyy • hh:mm a').format(item.date),
-                  style: TextStyle(fontSize: AppSizes.fontXS, color: Colors.grey),
-                ),
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                        AppSizes.paddingL, 0, AppSizes.paddingL, AppSizes.paddingL),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Divider(),
-                        SizedBox(height: AppSizes.paddingS),
-                        _buildDetailsGrid(context, tipController),
-                        if (item.isCustomSplit && item.peopleList != null)
-                          _buildCustomSplitDetails(context, tipController),
-                        SizedBox(height: AppSizes.paddingL),
-                        _buildActionButtons(context, tipController),
-                      ],
+                child: ExpansionTile(
+                  // Use a very specific key to avoid collision with scrollable children state
+                  key: PageStorageKey('history_tile_v5_${item.id}'),
+                  maintainState: true,
+                  enabled: !controller.isSelectionMode.value,
+                  shape: const RoundedRectangleBorder(side: BorderSide.none),
+                  collapsedShape: const RoundedRectangleBorder(side: BorderSide.none),
+                  tilePadding: EdgeInsets.symmetric(
+                      horizontal: AppSizes.paddingL, vertical: AppSizes.paddingS),
+                  leading: Container(
+                    padding: EdgeInsets.all(AppSizes.paddingS),
+                    decoration: BoxDecoration(
+                      color: AppColors.getPrimaryLight(context),
+                      borderRadius: BorderRadius.circular(AppSizes.radiusM),
                     ),
+                    child: Icon(Icons.receipt_long,
+                        color: Theme.of(context).primaryColor, size: AppSizes.iconL),
                   ),
-                ],
+                  title: _buildTitle(context, tipController),
+                  subtitle: Text(
+                    DateFormat('MMM dd, yyyy • hh:mm a').format(item.date),
+                    style: TextStyle(fontSize: AppSizes.fontXS, color: Colors.grey),
+                  ),
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                          AppSizes.paddingL, 0, AppSizes.paddingL, AppSizes.paddingL),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Divider(height: 1),
+                          SizedBox(height: AppSizes.paddingS),
+                          _buildDetailsGrid(context, tipController),
+                          if (item.isCustomSplit && item.peopleList != null)
+                            _buildCustomSplitDetails(context, tipController),
+                          SizedBox(height: AppSizes.paddingL),
+                          _buildActionButtons(context, tipController),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             if (controller.isSelectionMode.value)

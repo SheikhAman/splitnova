@@ -69,13 +69,10 @@ class TripSummaryView extends GetView<TripSummaryController> {
                 children: [
                   _buildHeader(context, trip, result),
                   if (result.hasMixedCurrencies) _buildMixedCurrencyWarning(),
-                  SizedBox(height: AppSizes.paddingL),
                   _buildSectionTitle('grand_total_summary'.tr),
                   ...result.grandTotals.entries.map((entry) => _buildTotalCard(context, tipController, entry.key, entry.value)),
-                  SizedBox(height: AppSizes.paddingL),
                   _buildSectionTitle('per_person_summary'.tr),
                   _buildPerPersonList(context, tipController, result),
-                  SizedBox(height: AppSizes.paddingL),
                   _buildSectionTitle('bills_breakdown'.tr),
                   _buildBillsBreakdown(context),
                   SizedBox(height: 100), // Space for bottom buttons
@@ -164,7 +161,7 @@ class TripSummaryView extends GetView<TripSummaryController> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: EdgeInsets.only(bottom: AppSizes.paddingM),
+      padding: EdgeInsets.only(top: AppSizes.paddingL, bottom: AppSizes.paddingS),
       child: Text(title,
           style: TextStyle(fontSize: AppSizes.fontL, fontWeight: FontWeight.bold)),
     );
@@ -173,6 +170,11 @@ class TripSummaryView extends GetView<TripSummaryController> {
   Widget _buildTotalCard(BuildContext context, TipController tipController, String currency, double amount) {
     return Card(
       margin: EdgeInsets.only(bottom: AppSizes.paddingS),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusL),
+        side: BorderSide(color: AppColors.getCardBorderColor(context)),
+      ),
       child: ListTile(
         title: Text(currency, style: TextStyle(fontWeight: FontWeight.bold)),
         trailing: Text(tipController.formatMoney(amount, currency),
@@ -194,12 +196,23 @@ class TripSummaryView extends GetView<TripSummaryController> {
                 padding: EdgeInsets.symmetric(vertical: 8),
                 child: Text(currency, style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
               ),
-            ...list.map((p) => ListTile(
-              leading: CircleAvatar(child: Text(p.displayName[0].toUpperCase())),
-              title: Text(p.displayName),
-              subtitle: Text("${p.sharePercentage.toStringAsFixed(1)}% ${'of_total'.tr}"),
-              trailing: Text(tipController.formatMoney(p.totalAmount, p.currency),
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ...list.map((p) => Card(
+              margin: EdgeInsets.only(bottom: AppSizes.paddingS),
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSizes.radiusM),
+                side: BorderSide(color: AppColors.getCardBorderColor(context)),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: AppColors.getPrimaryLight(context),
+                  child: Text(p.displayName[0].toUpperCase(), style: TextStyle(color: Theme.of(context).primaryColor)),
+                ),
+                title: Text(p.displayName, style: TextStyle(fontWeight: FontWeight.w600)),
+                subtitle: Text("${p.sharePercentage.toStringAsFixed(1)}% ${'of_total'.tr}"),
+                trailing: Text(tipController.formatMoney(p.totalAmount, p.currency),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
+              ),
             )),
           ],
         );
@@ -265,28 +278,39 @@ class _ReadOnlyHistoryItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSizes.radiusL),
         side: BorderSide(color: AppColors.getCardBorderColor(context)),
       ),
-      child: ExpansionTile(
-        key: PageStorageKey('trip_history_${item.id}'),
-        tilePadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: AppSizes.paddingS),
-        leading: Icon(Icons.receipt_long, color: Theme.of(context).primaryColor),
-        title: Text(
-          tipController.formatMoney(item.bill + item.tipAmount, item.currency),
-          style: TextStyle(fontWeight: FontWeight.w900, fontSize: AppSizes.fontL),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          expansionTileTheme: const ExpansionTileThemeData(
+            shape: RoundedRectangleBorder(side: BorderSide.none),
+            collapsedShape: RoundedRectangleBorder(side: BorderSide.none),
+          ),
         ),
-        subtitle: Text(DateFormat.yMMMd().format(item.date)),
-        children: [
-          Padding(
-            padding: EdgeInsets.all(AppSizes.paddingL),
-            child: Column(
-              children: [
-                _row('bill'.tr, tipController.formatMoney(item.bill, item.currency)),
-                _row('tip'.tr, tipController.formatMoney(item.tipAmount, item.currency)),
-                if (item.reason != null && item.reason!.isNotEmpty)
-                  _row('note'.tr, item.reason!),
-              ],
-            ),
-          )
-        ],
+        child: ExpansionTile(
+          key: PageStorageKey('trip_history_${item.id}'),
+          shape: const RoundedRectangleBorder(side: BorderSide.none),
+          collapsedShape: const RoundedRectangleBorder(side: BorderSide.none),
+          tilePadding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: AppSizes.paddingS),
+          leading: Icon(Icons.receipt_long, color: Theme.of(context).primaryColor),
+          title: Text(
+            tipController.formatMoney(item.bill + item.tipAmount, item.currency),
+            style: TextStyle(fontWeight: FontWeight.w900, fontSize: AppSizes.fontL),
+          ),
+          subtitle: Text(DateFormat.yMMMd().format(item.date)),
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(AppSizes.paddingL, 0, AppSizes.paddingL, AppSizes.paddingL),
+              child: Column(
+                children: [
+                  _row('bill'.tr, tipController.formatMoney(item.bill, item.currency)),
+                  _row('tip'.tr, tipController.formatMoney(item.tipAmount, item.currency)),
+                  if (item.reason != null && item.reason!.isNotEmpty)
+                    _row('note'.tr, item.reason!),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

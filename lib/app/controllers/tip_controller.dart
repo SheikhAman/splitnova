@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../modules/home/home_controller.dart';
 
 class Person {
   final String id;
@@ -46,6 +45,13 @@ class TipController extends GetxController {
   var selectedCurrency = "USD".obs;
   var isCustomSplit = false.obs;
   var peopleList = <Person>[].obs;
+
+  // Navigation state for the shell
+  var selectedIndex = 0.obs;
+
+  void changeTab(int index) {
+    selectedIndex.value = index;
+  }
 
   // Defaults for Settings
   var defaultTip = 15.0.obs;
@@ -440,15 +446,7 @@ class TipController extends GetxController {
   }
 
   void _navigateToHistory() {
-    try {
-      // Find the controller without a hard type dependency to avoid circular imports
-      if (Get.isRegistered<HomeController>()) {
-        Get.find<HomeController>().selectedIndex.value = 1;
-      }
-      Get.offNamed('/history');
-    } catch (e) {
-      Get.offAllNamed('/history');
-    }
+    selectedIndex.value = 1;
   }
 
   void _showToast(String title, String message) {

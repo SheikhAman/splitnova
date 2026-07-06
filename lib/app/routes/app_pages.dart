@@ -30,16 +30,6 @@ class AppPages {
       binding: HomeBinding(),
     ),
     GetPage(
-      name: _Paths.HISTORY,
-      page: () => const HistoryView(),
-      binding: HistoryBinding(),
-    ),
-    GetPage(
-      name: _Paths.SETTINGS,
-      page: () => const SettingsView(),
-      binding: SettingsBinding(),
-    ),
-    GetPage(
       name: _Paths.TRIP_SUMMARY,
       page: () => const TripSummaryView(),
       binding: TripSummaryBinding(),

@@ -76,6 +76,10 @@ class TripController extends GetxController {
   void deleteTrip(String id) {
     trips.removeWhere((t) => t.id == id);
     _saveTrips();
+    
+    // Notify listeners manually if needed, though .removeWhere on RxList should trigger it
+    // But we want to ensure TripSummaryController's 'ever' worker reacts
+    trips.refresh();
   }
 
   TripModel? getTripById(String id) {

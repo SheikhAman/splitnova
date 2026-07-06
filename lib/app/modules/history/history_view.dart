@@ -26,7 +26,9 @@ class HistoryView extends GetView<HistoryController> {
           if (controller.isSelectionMode.value) {
             controller.toggleSelectionMode();
           } else {
-            Get.back();
+            // Since this is now part of IndexedStack in HomeView,
+            // we might not want Get.back() here. 
+            // Usually, the shell handles back presses or they just exit the app.
           }
         },
         child: Scaffold(
@@ -52,6 +54,7 @@ class HistoryView extends GetView<HistoryController> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false, // Remove back button in shell
       title: Obx(() => Text(
             controller.isSelectionMode.value
                 ? '${controller.selectedIds.length} ${'selected'.tr}'
@@ -129,30 +132,18 @@ class HistoryView extends GetView<HistoryController> {
   }
 
   Widget _buildBillsList(BuildContext context) {
-    final tripController = Get.find<TripController>();
     return Obx(() {
       final bills = controller.historyList;
-      final trips = tripController.trips;
       
-      if (bills.isEmpty && trips.isEmpty) {
+      if (bills.isEmpty) {
         return _buildEmptyState(Icons.history, 'no_history'.tr);
       }
       
-      final List<dynamic> combinedList = [...trips, ...bills];
-      
       return ListView.builder(
         padding: EdgeInsets.all(AppSizes.paddingL),
-        itemCount: combinedList.length,
+        itemCount: bills.length,
         itemBuilder: (context, index) {
-          final item = combinedList[index];
-          
-          if (item is TripModel) {
-            return TripListItem(
-              trip: item,
-              controller: controller,
-            );
-          }
-          
+          final item = bills[index];
           final itemMap = item as Map<String, dynamic>;
           final historyItem = HistoryItem.fromMap(itemMap);
           return HistoryListItem(
@@ -246,103 +237,149 @@ class HistoryView extends GetView<HistoryController> {
 
     Get.dialog(
       AlertDialog(
-        title: Text('create_trip'.tr),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: 'trip_name_hint'.tr,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusL)),
+        title: Text('create_trip'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('trip_name_label'.tr, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey)),
+                SizedBox(height: AppSizes.paddingS),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    hintText: 'trip_name_hint'.tr,
+                    filled: true,
+                    fillColor: Get.theme.primaryColor.withValues(alpha: 0.05),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSizes.radiusM),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.edit_note),
+                    contentPadding: EdgeInsets.all(AppSizes.paddingM),
+                  ),
+                  autofocus: true,
+                  textCapitalization: TextCapitalization.words,
                 ),
-                autofocus: true,
-              ),
-              SizedBox(height: AppSizes.paddingL),
-              Text('select_emoji'.tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSizes.fontM)),
-              SizedBox(height: AppSizes.paddingS),
-              SizedBox(
-                height: 50,
-                child: ListView.builder(
+                SizedBox(height: AppSizes.paddingL),
+                Text('select_emoji'.tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSizes.fontM)),
+                SizedBox(height: AppSizes.paddingS),
+                SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  itemCount: emojis.length,
-                  itemBuilder: (context, index) {
-                    return Obx(() => GestureDetector(
-                      onTap: () => selectedEmoji.value = emojis[index],
+                  child: Row(
+                    children: emojis.map((emoji) => Obx(() => GestureDetector(
+                      onTap: () => selectedEmoji.value = emoji,
                       child: Container(
                         margin: EdgeInsets.only(right: AppSizes.paddingS),
                         padding: EdgeInsets.all(AppSizes.paddingS),
                         decoration: BoxDecoration(
-                          color: selectedEmoji.value == emojis[index] ? AppColors.getPrimaryLight(context) : Colors.transparent,
+                          color: selectedEmoji.value == emoji ? AppColors.getPrimaryLight(context) : Colors.transparent,
                           borderRadius: BorderRadius.circular(AppSizes.radiusS),
                           border: Border.all(
-                            color: selectedEmoji.value == emojis[index] ? Theme.of(context).primaryColor : Colors.grey.withValues(alpha: 0.2),
+                            color: selectedEmoji.value == emoji ? Theme.of(context).primaryColor : Colors.grey.withValues(alpha: 0.2),
+                            width: selectedEmoji.value == emoji ? 2 : 1,
                           ),
                         ),
-                        child: Text(emojis[index], style: TextStyle(fontSize: AppSizes.iconM)),
+                        child: Text(emoji, style: TextStyle(fontSize: AppSizes.iconM)),
                       ),
-                    ));
-                  },
+                    ))).toList(),
+                  ),
                 ),
-              ),
-              SizedBox(height: AppSizes.paddingL),
-              Text('select_color'.tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSizes.fontM)),
-              SizedBox(height: AppSizes.paddingS),
-              SizedBox(
-                height: 40,
-                child: ListView.builder(
+                SizedBox(height: AppSizes.paddingL),
+                Text('select_color'.tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: AppSizes.fontM)),
+                SizedBox(height: AppSizes.paddingS),
+                SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  itemCount: colors.length,
-                  itemBuilder: (context, index) {
-                    return Obx(() => GestureDetector(
-                      onTap: () => selectedColor.value = colors[index].toARGB32(),
+                  child: Row(
+                    children: colors.map((color) => Obx(() => GestureDetector(
+                      onTap: () => selectedColor.value = color.toARGB32(),
                       child: Container(
-                        width: 40,
+                        width: 44,
+                        height: 44,
                         margin: EdgeInsets.only(right: AppSizes.paddingS),
                         decoration: BoxDecoration(
-                          color: colors[index],
+                          color: color,
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: selectedColor.value == colors[index].toARGB32() ? Colors.white : Colors.transparent,
-                            width: 2,
+                            color: selectedColor.value == color.toARGB32() ? Colors.white : Colors.transparent,
+                            width: 3,
                           ),
                           boxShadow: [
-                            if (selectedColor.value == colors[index].toARGB32())
-                              BoxShadow(color: colors[index].withValues(alpha: 0.4), blurRadius: 4, spreadRadius: 1),
+                            if (selectedColor.value == color.toARGB32())
+                              BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 6, spreadRadius: 2),
                           ],
                         ),
-                        child: selectedColor.value == colors[index].toARGB32()
-                          ? const Icon(Icons.check, color: Colors.white, size: 20)
+                        child: selectedColor.value == color.toARGB32()
+                          ? const Icon(Icons.check, color: Colors.white, size: 24)
                           : null,
                       ),
-                    ));
+                    ))).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actionsPadding: EdgeInsets.fromLTRB(AppSizes.paddingL, 0, AppSizes.paddingL, AppSizes.paddingL),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Get.back(),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: Colors.grey.shade400),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+                  ),
+                  child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey)),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    final name = nameController.text.trim();
+                    if (name.isNotEmpty) {
+                      // Close the dialog FIRST before triggering other actions
+                      Get.back();
+                      
+                      tripController.createTrip(
+                        name,
+                        controller.selectedIds.toList(),
+                        emoji: selectedEmoji.value,
+                        colorValue: selectedColor.value,
+                      );
+                      controller.toggleSelectionMode();
+                    } else {
+                      Get.snackbar(
+                        'error'.tr,
+                        'enter_trip_name'.tr,
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                        margin: const EdgeInsets.all(16),
+                      );
+                    }
                   },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+                    elevation: 0,
+                  ),
+                  child: Text('create'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                tripController.createTrip(
-                  nameController.text,
-                  controller.selectedIds.toList(),
-                  emoji: selectedEmoji.value,
-                  colorValue: selectedColor.value,
-                );
-                controller.toggleSelectionMode();
-                Get.back();
-              }
-            },
-            child: Text('create'.tr),
-          ),
         ],
       ),
+      barrierDismissible: false,
     );
   }
 

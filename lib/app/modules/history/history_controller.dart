@@ -198,7 +198,9 @@ class HistoryController extends GetxController {
   void loadItemToCalculator(HistoryItem item) {
     final tipController = Get.find<TipController>();
     tipController.loadHistoryItem(item.toMap());
-    Get.offAllNamed(Routes.HOME);
+    
+    // Switch to calculator tab in the home shell
+    tipController.selectedIndex.value = 0;
   }
 
   String getHistoryShareMessage(HistoryItem item) {

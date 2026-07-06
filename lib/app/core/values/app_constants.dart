@@ -68,7 +68,7 @@ class AppColors {
   static const Color errorRed = Colors.redAccent;
   
   static Color getCardBorderColor(BuildContext context) => 
-      Theme.of(context).dividerColor.withValues(alpha: 0.05);
+      Theme.of(context).primaryColor.withValues(alpha: 0.12);
       
   static Color getPrimaryLight(BuildContext context) => 
       Theme.of(context).primaryColor.withValues(alpha: 0.1);

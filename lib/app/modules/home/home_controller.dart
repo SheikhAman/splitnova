@@ -20,18 +20,8 @@ class HomeController extends GetxController {
   final stt.SpeechToText _speech = stt.SpeechToText();
   var isListening = false.obs;
   
-  var selectedIndex = 0.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
   void changeTab(int index) {
-    selectedIndex.value = index;
-    if (index == 0) Get.offNamed('/home');
-    if (index == 1) Get.offNamed('/history');
-    if (index == 2) Get.offNamed('/settings');
+    tipController.selectedIndex.value = index;
   }
 
   Future<void> startListening() async {

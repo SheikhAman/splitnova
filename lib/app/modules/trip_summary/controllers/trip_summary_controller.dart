@@ -6,16 +6,19 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:splitnova/app/controllers/tip_controller.dart';
 import '../../../controllers/trip_controller.dart';
 import '../../history/history_controller.dart';
 import '../../../data/models/trip_model.dart';
 import '../../../data/models/history_model.dart';
 import '../../../data/services/trip_aggregation_service.dart';
 import '../../../data/services/trip_export_service.dart';
+import '../../../core/values/app_constants.dart';
 
 class TripSummaryController extends GetxController {
   final TripController tripController = Get.find<TripController>();
   final HistoryController historyController = Get.find<HistoryController>();
+  final TipController tipController = Get.find<TipController>();
   
   final GlobalKey summaryKey = GlobalKey();
 
@@ -44,7 +47,10 @@ class TripSummaryController extends GetxController {
   void loadData() {
     final t = tripController.getTripById(tripId);
     if (t == null) {
-      // Trip might have been deleted
+      // Trip might have been deleted (e.g. via Undo snackbar)
+      if (Get.currentRoute == '/trip-summary') {
+        Get.back();
+      }
       return;
     }
     trip.value = t;
@@ -60,61 +66,108 @@ class TripSummaryController extends GetxController {
 
     // Check for dissolution prompt
     if (referencedBills.length <= 1) {
-      _showDissolvePrompt();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showDissolvePrompt();
+      });
     }
 
     // Run aggregation
     aggregation.value = TripAggregationService.aggregate(referencedBills);
   }
 
+  bool _isDissolveDialogShowing = false;
   void _showDissolvePrompt() {
-    if (Get.isDialogOpen ?? false) return;
+    if (_isDissolveDialogShowing || trip.value == null) return;
+    _isDissolveDialogShowing = true;
     
     Get.dialog(
       AlertDialog(
-        title: Text('dissolve_trip_title'.tr),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusL)),
+        title: Text('dissolve_trip_title'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         content: Text('dissolve_trip_message'.trParams({'n': referencedBills.length.toString()})),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
-            child: Text('cancel'.tr),
-          ),
-          TextButton(
             onPressed: () {
-              tripController.deleteTrip(tripId);
-              Get.back(); // Close dialog
-              Get.back(); // Go back to history
+              _isDissolveDialogShowing = false;
+              Get.back();
             },
-            child: Text('dissolve'.tr, style: const TextStyle(color: Colors.red)),
+            child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+            ),
+            onPressed: () {
+              _isDissolveDialogShowing = false;
+              final idToDelete = tripId;
+              Get.back(); // Close dialog
+              tripController.deleteTrip(idToDelete);
+            },
+            child: Text('dissolve'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
       barrierDismissible: false,
-    );
+    ).then((_) => _isDissolveDialogShowing = false);
   }
 
   void renameTrip() {
     final nameController = TextEditingController(text: trip.value?.name);
     Get.dialog(
       AlertDialog(
-        title: Text('rename_trip'.tr),
-        content: TextField(
-          controller: nameController,
-          decoration: InputDecoration(
-            hintText: 'trip_name_hint'.tr,
-          ),
-          autofocus: true,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusL)),
+        title: Text('rename'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('trip_name_label'.tr, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey)),
+            SizedBox(height: AppSizes.paddingS),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                hintText: 'trip_name_hint'.tr,
+                filled: true,
+                fillColor: Get.theme.primaryColor.withValues(alpha: 0.05),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSizes.radiusM),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: EdgeInsets.all(AppSizes.paddingM),
+              ),
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+            ),
+          ],
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
           TextButton(
+            onPressed: () => Get.back(),
+            child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+            ),
             onPressed: () {
-              if (nameController.text.trim().isNotEmpty) {
-                tripController.updateTrip(tripId, name: nameController.text.trim());
+              final newName = nameController.text.trim();
+              if (newName.isNotEmpty) {
+                tripController.updateTrip(tripId, name: newName);
                 Get.back();
+              } else {
+                Get.snackbar(
+                  'error'.tr,
+                  'enter_trip_name'.tr,
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(16),
+                );
               }
             },
-            child: Text('save'.tr),
+            child: Text('save'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -129,17 +182,26 @@ class TripSummaryController extends GetxController {
   void ungroupTrip() {
     Get.dialog(
       AlertDialog(
-        title: Text('ungroup_trip_title'.tr),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusL)),
+        title: Text('ungroup'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         content: Text('ungroup_trip_message'.tr),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
           TextButton(
+            onPressed: () => Get.back(),
+            child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+            ),
             onPressed: () {
-              tripController.deleteTrip(tripId);
-              Get.back();
-              Get.back();
+              final idToDelete = tripId;
+              Get.back(); // Close dialog
+              tripController.deleteTrip(idToDelete);
             },
-            child: Text('ungroup'.tr, style: const TextStyle(color: Colors.red)),
+            child: Text('ungroup'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -147,56 +209,101 @@ class TripSummaryController extends GetxController {
   }
 
   void editBills() {
-    // For this phase, a simple selection dialog
     final allHistory = historyController.historyList
         .map((e) => HistoryItem.fromMap(Map<String, dynamic>.from(e)))
-        .toList();
+        .toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
     
     var tempSelectedIds = List<String>.from(trip.value?.billIds ?? []).obs;
 
     Get.dialog(
-      Obx(() => AlertDialog(
-        title: Text('add_remove_bills'.tr),
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusL)),
+        title: Text('add_remove_bills'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+        contentPadding: EdgeInsets.zero,
         content: SizedBox(
           width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: allHistory.length,
-            itemBuilder: (context, index) {
-              final item = allHistory[index];
-              final isSelected = tempSelectedIds.contains(item.id);
-              return CheckboxListTile(
-                title: Text(item.reason ?? 'bill'.tr),
-                subtitle: Text(DateFormat.yMMMd().format(item.date)),
-                value: isSelected,
-                onChanged: (val) {
-                  if (val == true) {
-                    tempSelectedIds.add(item.id);
-                  } else {
-                    tempSelectedIds.remove(item.id);
-                  }
-                },
-              );
-            },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSizes.paddingL, vertical: AppSizes.paddingS),
+                child: Text('select_bills_message'.tr, style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey)),
+              ),
+              const Divider(height: 1),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: Get.height * 0.5,
+                ),
+                child: allHistory.isEmpty 
+                  ? Center(child: Padding(
+                      padding: EdgeInsets.all(AppSizes.paddingXL),
+                      child: Text('no_history'.tr),
+                    ))
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: allHistory.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final item = allHistory[index];
+                        final amountStr = tipController.formatMoney(item.bill + item.tipAmount, item.currency);
+                        
+                        return Obx(() {
+                          final isSelected = tempSelectedIds.contains(item.id);
+                          return CheckboxListTile(
+                            title: Text(
+                              item.reason != null && item.reason!.isNotEmpty 
+                                  ? item.reason! 
+                                  : 'bill'.tr,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Text(
+                              "${DateFormat('MMM dd').format(item.date)} • $amountStr",
+                              style: TextStyle(fontSize: AppSizes.fontS),
+                            ),
+                            value: isSelected,
+                            activeColor: Get.theme.primaryColor,
+                            onChanged: (val) {
+                              if (val == true) {
+                                tempSelectedIds.add(item.id);
+                              } else {
+                                tempSelectedIds.remove(item.id);
+                              }
+                            },
+                          );
+                        });
+                      },
+                    ),
+              ),
+              const Divider(height: 1),
+            ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr)),
           TextButton(
+            onPressed: () => Get.back(),
+            child: Text('cancel'.tr, style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusM)),
+            ),
             onPressed: () {
               tripController.updateTrip(tripId, billIds: tempSelectedIds);
               Get.back();
             },
-            child: Text('save'.tr),
+            child: Text('save'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
-      )),
+      ),
     );
   }
 
   void exportPdf() async {
     if (trip.value == null) return;
-    await TripExportService.exportToPdf(trip.value!, aggregation.value);
+    await TripExportService.exportToPdf(trip.value!, aggregation.value, referencedBills);
   }
 
   void exportImage() async {
