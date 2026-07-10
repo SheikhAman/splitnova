@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../data/models/trip_model.dart';
+import 'tip_controller.dart';
+import '../modules/history/history_controller.dart';
 
 class TripController extends GetxController {
   final _box = GetStorage();
@@ -40,23 +43,33 @@ class TripController extends GetxController {
     trips.insert(0, newTrip);
     _saveTrips();
 
-    Get.snackbar(
-      'success'.tr,
-      'grouped_as'.trParams({'name': name}),
-      mainButton: TextButton(
-        onPressed: () {
-          deleteTrip(newTrip.id);
-          if (Get.isSnackbarOpen) Get.back();
-        },
-        child: Text('undo'.tr, style: const TextStyle(color: Colors.orange)),
+    _showSuccessToast(name);
+    _navigateToTrips();
+  }
+
+  void _showSuccessToast(String name) {
+    Get.rawSnackbar(
+      messageText: Text(
+        'grouped_as'.trParams({'name': name}),
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+        textAlign: TextAlign.center,
       ),
-      duration: const Duration(seconds: 5),
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.black87,
-      colorText: Colors.white,
-      margin: const EdgeInsets.all(16),
-      borderRadius: 8,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 50),
+      borderRadius: 100,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      duration: const Duration(seconds: 2),
+      isDismissible: true,
     );
+  }
+
+  void _navigateToTrips() {
+    final tipController = Get.find<TipController>();
+    final historyController = Get.find<HistoryController>();
+    
+    tipController.selectedIndex.value = 1; // History Tab
+    historyController.selectedTab.value = 1; // Trips Sub-Tab
   }
 
   void updateTrip(String id, {String? name, List<String>? billIds, bool? isSettled, String? emoji, int? colorValue}) {
@@ -74,12 +87,48 @@ class TripController extends GetxController {
   }
 
   void deleteTrip(String id) {
-    trips.removeWhere((t) => t.id == id);
+    final tripToDelete = trips.firstWhereOrNull((t) => t.id == id);
+    if (tripToDelete == null) return;
+
+    final int index = trips.indexOf(tripToDelete);
+    trips.removeAt(index);
     _saveTrips();
-    
-    // Notify listeners manually if needed, though .removeWhere on RxList should trigger it
-    // But we want to ensure TripSummaryController's 'ever' worker reacts
     trips.refresh();
+
+    _showUndoDeleteTripToast(tripToDelete, index);
+  }
+
+  void _showUndoDeleteTripToast(TripModel trip, int index) {
+    Get.rawSnackbar(
+      messageText: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'trip_deleted'.tr,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ),
+          Container(height: 14, width: 1, color: Colors.white24, margin: const EdgeInsets.symmetric(horizontal: 10)),
+          GestureDetector(
+            onTap: () {
+              trips.insert(index, trip);
+              _saveTrips();
+              if (Get.isSnackbarOpen) Get.back();
+            },
+            child: Text(
+              'undo'.tr.toUpperCase(),
+              style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 11),
+            ),
+          ),
+        ],
+      ),
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 50),
+      borderRadius: 100,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      duration: const Duration(seconds: 4),
+    );
   }
 
   TripModel? getTripById(String id) {

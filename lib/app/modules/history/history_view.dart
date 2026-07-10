@@ -17,39 +17,57 @@ class HistoryView extends GetView<HistoryController> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          if (didPop) return;
-          if (controller.isSelectionMode.value) {
-            controller.toggleSelectionMode();
-          } else {
-            // Since this is now part of IndexedStack in HomeView,
-            // we might not want Get.back() here. 
-            // Usually, the shell handles back presses or they just exit the app.
-          }
-        },
-        child: Scaffold(
-          appBar: _buildAppBar(context),
-          body: Column(
-            children: [
-              _buildSuggestionBanner(),
-              Expanded(
-                child: TabBarView(
+    return Obx(() => DefaultTabController(
+          length: 2,
+          initialIndex: controller.selectedTab.value,
+          child: Builder(builder: (context) {
+            final TabController tabController = DefaultTabController.of(context);
+
+            // Listen to state changes to update the tab controller
+            ever(controller.selectedTab, (int index) {
+              if (tabController.index != index) {
+                tabController.animateTo(index);
+              }
+            });
+
+            // Listen to tab controller changes to update state
+            tabController.addListener(() {
+              if (!tabController.indexIsChanging) {
+                controller.selectedTab.value = tabController.index;
+              }
+            });
+
+            return PopScope(
+              canPop: false,
+              onPopInvokedWithResult: (didPop, result) {
+                if (didPop) return;
+                if (controller.isSelectionMode.value) {
+                  controller.toggleSelectionMode();
+                } else {
+                  // Since this is now part of IndexedStack in HomeView,
+                  // we might not want Get.back() here.
+                }
+              },
+              child: Scaffold(
+                appBar: _buildAppBar(context),
+                body: Column(
                   children: [
-                    _buildBillsList(context),
-                    _buildTripsList(context),
+                    _buildSuggestionBanner(),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          _buildBillsList(context),
+                          _buildTripsList(context),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
+                floatingActionButton: _buildFloatingActionButton(context),
               ),
-            ],
-          ),
-          floatingActionButton: _buildFloatingActionButton(context),
-        ),
-      ),
-    );
+            );
+          }),
+        ));
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
@@ -134,11 +152,11 @@ class HistoryView extends GetView<HistoryController> {
   Widget _buildBillsList(BuildContext context) {
     return Obx(() {
       final bills = controller.historyList;
-      
+
       if (bills.isEmpty) {
         return _buildEmptyState(Icons.history, 'no_history'.tr);
       }
-      
+
       return ListView.builder(
         padding: EdgeInsets.all(AppSizes.paddingL),
         itemCount: bills.length,
@@ -217,7 +235,7 @@ class HistoryView extends GetView<HistoryController> {
 
     final TextEditingController nameController = TextEditingController();
     final tripController = Get.find<TripController>();
-    
+
     RxString selectedEmoji = '✈️'.obs;
     RxInt selectedColor = Colors.orange.toARGB32().obs;
 
@@ -271,21 +289,21 @@ class HistoryView extends GetView<HistoryController> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: emojis.map((emoji) => Obx(() => GestureDetector(
-                      onTap: () => selectedEmoji.value = emoji,
-                      child: Container(
-                        margin: EdgeInsets.only(right: AppSizes.paddingS),
-                        padding: EdgeInsets.all(AppSizes.paddingS),
-                        decoration: BoxDecoration(
-                          color: selectedEmoji.value == emoji ? AppColors.getPrimaryLight(context) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(AppSizes.radiusS),
-                          border: Border.all(
-                            color: selectedEmoji.value == emoji ? Theme.of(context).primaryColor : Colors.grey.withValues(alpha: 0.2),
-                            width: selectedEmoji.value == emoji ? 2 : 1,
+                          onTap: () => selectedEmoji.value = emoji,
+                          child: Container(
+                            margin: EdgeInsets.only(right: AppSizes.paddingS),
+                            padding: EdgeInsets.all(AppSizes.paddingS),
+                            decoration: BoxDecoration(
+                              color: selectedEmoji.value == emoji ? AppColors.getPrimaryLight(context) : Colors.transparent,
+                              borderRadius: BorderRadius.circular(AppSizes.radiusS),
+                              border: Border.all(
+                                color: selectedEmoji.value == emoji ? Theme.of(context).primaryColor : Colors.grey.withValues(alpha: 0.2),
+                                width: selectedEmoji.value == emoji ? 2 : 1,
+                              ),
+                            ),
+                            child: Text(emoji, style: TextStyle(fontSize: AppSizes.iconM)),
                           ),
-                        ),
-                        child: Text(emoji, style: TextStyle(fontSize: AppSizes.iconM)),
-                      ),
-                    ))).toList(),
+                        ))).toList(),
                   ),
                 ),
                 SizedBox(height: AppSizes.paddingL),
@@ -295,28 +313,25 @@ class HistoryView extends GetView<HistoryController> {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: colors.map((color) => Obx(() => GestureDetector(
-                      onTap: () => selectedColor.value = color.toARGB32(),
-                      child: Container(
-                        width: 44,
-                        height: 44,
-                        margin: EdgeInsets.only(right: AppSizes.paddingS),
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: selectedColor.value == color.toARGB32() ? Colors.white : Colors.transparent,
-                            width: 3,
+                          onTap: () => selectedColor.value = color.toARGB32(),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            margin: EdgeInsets.only(right: AppSizes.paddingS),
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: selectedColor.value == color.toARGB32() ? Colors.white : Colors.transparent,
+                                width: 3,
+                              ),
+                              boxShadow: [
+                                if (selectedColor.value == color.toARGB32()) BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 6, spreadRadius: 2),
+                              ],
+                            ),
+                            child: selectedColor.value == color.toARGB32() ? const Icon(Icons.check, color: Colors.white, size: 24) : null,
                           ),
-                          boxShadow: [
-                            if (selectedColor.value == color.toARGB32())
-                              BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 6, spreadRadius: 2),
-                          ],
-                        ),
-                        child: selectedColor.value == color.toARGB32()
-                          ? const Icon(Icons.check, color: Colors.white, size: 24)
-                          : null,
-                      ),
-                    ))).toList(),
+                        ))).toList(),
                   ),
                 ),
               ],
@@ -346,7 +361,7 @@ class HistoryView extends GetView<HistoryController> {
                     if (name.isNotEmpty) {
                       // Close the dialog FIRST before triggering other actions
                       Get.back();
-                      
+
                       tripController.createTrip(
                         name,
                         controller.selectedIds.toList(),

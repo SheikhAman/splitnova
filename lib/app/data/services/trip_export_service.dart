@@ -7,7 +7,7 @@ import '../models/history_model.dart';
 import 'trip_aggregation_service.dart';
 
 /// Professional Export Service designed with Material Design 3 and Google styling principles.
-/// Provides a comprehensive audit trail for trip expenses.
+/// Enhanced with embedded per-person breakdowns for maximum transparency.
 class TripExportService {
   // Google Professional Palette
   static const _googleBlue = PdfColor.fromInt(0xFF1A73E8);
@@ -16,14 +16,14 @@ class TripExportService {
   static const _bgLight = PdfColor.fromInt(0xFFF8F9FA);
   static const _borderGrey = PdfColor.fromInt(0xFFDADCE0);
   static const _successGreen = PdfColor.fromInt(0xFF1E8E3E);
+  static const _dividerGrey = PdfColor.fromInt(0xFFE8EAED);
 
   static Future<void> exportToPdf(TripModel trip, TripAggregationResult result, List<HistoryItem> bills) async {
     final pdf = pw.Document(
       author: 'SplitNova',
-      title: 'Expense Report - ${_sanitize(trip.name)}',
+      title: 'Financial Report - ${_sanitize(trip.name)}',
     );
 
-    // Load Professional Fonts
     final fontRegular = await PdfGoogleFonts.robotoRegular();
     final fontBold = await PdfGoogleFonts.robotoBold();
     final fontItalic = await PdfGoogleFonts.robotoItalic();
@@ -31,13 +31,13 @@ class TripExportService {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(40),
+        margin: const pw.EdgeInsets.all(35),
         footer: (pw.Context context) => _buildFooter(context, fontRegular),
         header: (pw.Context context) => _buildHeader(trip, result, bills, fontRegular, fontBold),
         build: (pw.Context context) {
           if (bills.isEmpty) {
             return [
-              pw.SizedBox(height: 40),
+              pw.SizedBox(height: 60),
               pw.Container(
                 width: double.infinity,
                 padding: const pw.EdgeInsets.all(32),
@@ -48,10 +48,10 @@ class TripExportService {
                 ),
                 child: pw.Column(
                   children: [
-                    pw.Text('NO FINANCIAL RECORDS', style: pw.TextStyle(font: fontBold, fontSize: 14, color: _googleGrey, letterSpacing: 1)),
+                    pw.Text('NO FINANCIAL DATA AVAILABLE', style: pw.TextStyle(font: fontBold, fontSize: 14, color: _googleGrey, letterSpacing: 1.2)),
                     pw.SizedBox(height: 12),
                     pw.Text(
-                      'This report does not contain any itemized expenses. To generate a full audit log, please ensure bills are associated with this trip in the SplitNova app.',
+                      'This report contains no itemized expenses. Ensure bills are associated with this trip in the app to generate a full audit trail.',
                       style: pw.TextStyle(font: fontRegular, fontSize: 10, color: _googleGrey),
                       textAlign: pw.TextAlign.center,
                     ),
@@ -69,32 +69,32 @@ class TripExportService {
               .length;
 
           return [
-            pw.SizedBox(height: 24),
+            pw.SizedBox(height: 20),
             
             // 1. Executive Summary
             _buildSectionHeader('EXECUTIVE SUMMARY', fontBold),
             _buildExecutiveSummary(result, bills, fontRegular, fontBold),
             pw.SizedBox(height: 32),
 
-            // 2. Itemized Breakdown
-            _buildSectionHeader('ITEMIZED EXPENSE LOG', fontBold),
-            _buildItemizedTable(bills, fontRegular, fontBold),
+            // 2. Detailed Itemized Ledger (Embedded Splits)
+            _buildSectionHeader('ITEMIZED FINANCIAL LEDGER', fontBold),
+            _buildItemizedLedger(bills, fontRegular, fontBold),
             pw.SizedBox(height: 32),
 
-            // 3. Settlement Breakdown
-            _buildSectionHeader('INDIVIDUAL SETTLEMENTS ($participantCount PARTICIPANTS)', fontBold),
-            ..._buildSettlementTables(result, fontRegular, fontBold),
+            // 3. Settlement Summary
+            _buildSectionHeader('SETTLEMENT SUMMARY ($participantCount PARTICIPANTS)', fontBold),
+            ..._buildSettlementSummary(result, fontRegular, fontBold),
             
             pw.SizedBox(height: 40),
             _buildFinancialDisclaimer(fontItalic),
-            pw.SizedBox(height: 20),
+            pw.SizedBox(height: 24),
             _buildSecurityBadge(fontRegular),
           ];
         },
       ),
     );
 
-    final filename = "${trip.name.replaceAll(RegExp(r'[^\w\s]+'), '').trim()}_Report.pdf";
+    final filename = "${trip.name.replaceAll(RegExp(r'[^\w\s]+'), '').trim()}_Financial_Report.pdf";
     await Printing.sharePdf(bytes: await pdf.save(), filename: filename);
   }
 
@@ -113,23 +113,20 @@ class TripExportService {
                 pw.Row(
                   children: [
                     pw.Container(
-                      width: 12,
-                      height: 12,
-                      decoration: pw.BoxDecoration(
-                        color: _googleBlue,
-                        borderRadius: const pw.BorderRadius.all(pw.Radius.circular(2)),
-                      ),
+                      width: 14,
+                      height: 14,
+                      decoration: pw.BoxDecoration(color: _googleBlue, borderRadius: const pw.BorderRadius.all(pw.Radius.circular(3))),
                     ),
-                    pw.SizedBox(width: 6),
-                    pw.Text('SPLITNOVA', style: pw.TextStyle(font: fontBold, fontSize: 12, color: _googleBlue, letterSpacing: 2)),
+                    pw.SizedBox(width: 8),
+                    pw.Text('SPLITNOVA', style: pw.TextStyle(font: fontBold, fontSize: 14, color: _googleBlue, letterSpacing: 2.5)),
                   ],
                 ),
                 pw.SizedBox(height: 16),
-                pw.Text(_sanitize(trip.name), style: pw.TextStyle(font: fontBold, fontSize: 26, color: _darkText)),
+                pw.Text(_sanitize(trip.name), style: pw.TextStyle(font: fontBold, fontSize: 28, color: _darkText)),
                 pw.SizedBox(height: 4),
                 pw.Row(
                   children: [
-                    pw.Text('OFFICIAL FINANCIAL REPORT', style: pw.TextStyle(font: fontBold, fontSize: 8, color: _googleGrey, letterSpacing: 0.5)),
+                    pw.Text('CERTIFIED FINANCIAL STATEMENT', style: pw.TextStyle(font: fontBold, fontSize: 8, color: _googleGrey, letterSpacing: 0.8)),
                     if (result.earliestDate != null) ...[
                       pw.Padding(
                         padding: const pw.EdgeInsets.symmetric(horizontal: 8),
@@ -148,33 +145,29 @@ class TripExportService {
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
                 pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: pw.BoxDecoration(
                     color: _bgLight,
-                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
+                    borderRadius: const pw.BorderRadius.all(pw.Radius.circular(20)),
                     border: pw.Border.all(color: _borderGrey),
                   ),
                   child: pw.Row(
                     mainAxisSize: pw.MainAxisSize.min,
                     children: [
-                      pw.Container(
-                        width: 6,
-                        height: 6,
-                        decoration: pw.BoxDecoration(color: tripColor, shape: pw.BoxShape.circle),
-                      ),
-                      pw.SizedBox(width: 6),
-                      pw.Text('${bills.length} TOTAL ENTRIES', style: pw.TextStyle(font: fontBold, fontSize: 8, color: _googleGrey)),
+                      pw.Container(width: 8, height: 8, decoration: pw.BoxDecoration(color: tripColor, shape: pw.BoxShape.circle)),
+                      pw.SizedBox(width: 8),
+                      pw.Text('${bills.length} ENTRIES', style: pw.TextStyle(font: fontBold, fontSize: 9, color: _googleGrey)),
                     ],
                   ),
                 ),
-                pw.SizedBox(height: 8),
-                pw.Text('REPORT ID: ${trip.id.toUpperCase().substring(0, 8)}', style: pw.TextStyle(font: font, fontSize: 7, color: _googleGrey)),
+                pw.SizedBox(height: 10),
+                pw.Text('DOC-ID: ${trip.id.toUpperCase().substring(0, 8)}', style: pw.TextStyle(font: font, fontSize: 8, color: _googleGrey)),
               ],
             ),
           ],
         ),
-        pw.SizedBox(height: 15),
-        pw.Divider(color: _googleBlue, thickness: 1.5),
+        pw.SizedBox(height: 20),
+        pw.Divider(color: _googleBlue, thickness: 2),
       ],
     );
   }
@@ -182,7 +175,7 @@ class TripExportService {
   static pw.Widget _buildSectionHeader(String title, pw.Font fontBold) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 12),
-      child: pw.Text(title, style: pw.TextStyle(font: fontBold, fontSize: 10, color: _googleGrey, letterSpacing: 1.2)),
+      child: pw.Text(title, style: pw.TextStyle(font: fontBold, fontSize: 11, color: _googleGrey, letterSpacing: 1.5)),
     );
   }
 
@@ -203,8 +196,8 @@ class TripExportService {
         final tipPercentage = baseBill > 0 ? (tips / baseBill) * 100 : 0.0;
 
         return pw.Container(
-          width: 200,
-          padding: const pw.EdgeInsets.all(16),
+          width: 230,
+          padding: const pw.EdgeInsets.all(20),
           decoration: pw.BoxDecoration(
             color: _bgLight,
             borderRadius: const pw.BorderRadius.all(pw.Radius.circular(12)),
@@ -216,30 +209,27 @@ class TripExportService {
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text('TOTAL SPENT ($currency)', style: pw.TextStyle(font: fontBold, fontSize: 9, color: _googleGrey)),
+                  pw.Text('GRAND TOTAL ($currency)', style: pw.TextStyle(font: fontBold, fontSize: 10, color: _googleGrey)),
                   pw.Container(
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: pw.BoxDecoration(
                       color: PdfColor(_googleBlue.red, _googleBlue.green, _googleBlue.blue, 0.1),
                       borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
                     ),
-                    child: pw.Text('VERIFIED', style: pw.TextStyle(font: fontBold, fontSize: 6, color: _googleBlue)),
+                    child: pw.Text('VERIFIED', style: pw.TextStyle(font: fontBold, fontSize: 7, color: _googleBlue)),
                   ),
                 ],
               ),
-              pw.SizedBox(height: 8),
-              pw.Text(
-                total.toStringAsFixed(2),
-                style: pw.TextStyle(font: fontBold, fontSize: 28, color: _googleBlue),
-              ),
               pw.SizedBox(height: 12),
-              pw.Divider(color: _borderGrey, thickness: 0.5),
+              pw.Text(total.toStringAsFixed(2), style: pw.TextStyle(font: fontBold, fontSize: 32, color: _googleBlue)),
+              pw.SizedBox(height: 16),
+              pw.Divider(color: _dividerGrey, thickness: 1),
+              pw.SizedBox(height: 12),
+              _buildSummaryDataRow('Subtotal (Base)', baseBill.toStringAsFixed(2), font),
               pw.SizedBox(height: 8),
-              _buildSummaryDataRow('Base Amount', baseBill.toStringAsFixed(2), font),
-              pw.SizedBox(height: 6),
-              _buildSummaryDataRow('Total Tips', tips.toStringAsFixed(2), font, valueColor: _successGreen),
-              pw.SizedBox(height: 6),
-              _buildSummaryDataRow('Avg. Tip %', "${tipPercentage.toStringAsFixed(1)}%", font, valueColor: _googleGrey),
+              _buildSummaryDataRow('Gratuity (Tips)', tips.toStringAsFixed(2), font, valueColor: _successGreen),
+              pw.SizedBox(height: 8),
+              _buildSummaryDataRow('Tip Avg.', "${tipPercentage.toStringAsFixed(1)}%", font, valueColor: _googleGrey),
             ],
           ),
         );
@@ -251,72 +241,178 @@ class TripExportService {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        pw.Text(label, style: pw.TextStyle(font: font, fontSize: 9, color: _googleGrey)),
-        pw.Text(value, style: pw.TextStyle(font: font, fontSize: 10, color: valueColor ?? _darkText, fontWeight: pw.FontWeight.bold)),
+        pw.Text(label, style: pw.TextStyle(font: font, fontSize: 10, color: _googleGrey)),
+        pw.Text(value, style: pw.TextStyle(font: font, fontSize: 11, color: valueColor ?? _darkText, fontWeight: pw.FontWeight.bold)),
       ],
     );
   }
 
-  static pw.Widget _buildItemizedTable(List<HistoryItem> bills, pw.Font font, pw.Font fontBold) {
-    return pw.TableHelper.fromTextArray(
-      border: pw.TableBorder.all(color: _borderGrey, width: 0.5),
-      headerStyle: pw.TextStyle(font: fontBold, color: _darkText, fontSize: 8),
-      headerDecoration: const pw.BoxDecoration(color: _bgLight),
-      oddRowDecoration: const pw.BoxDecoration(color: _bgLight),
-      cellHeight: 25,
-      cellAlignments: {
-        0: pw.Alignment.centerLeft,
-        1: pw.Alignment.centerLeft,
-        2: pw.Alignment.centerLeft,
-        3: pw.Alignment.centerRight,
-        4: pw.Alignment.centerRight,
-        5: pw.Alignment.centerRight,
+  static pw.Widget _buildItemizedLedger(List<HistoryItem> bills, pw.Font font, pw.Font fontBold) {
+    return pw.Table(
+      border: pw.TableBorder(
+        horizontalInside: pw.BorderSide(color: _dividerGrey, width: 0.5),
+        bottom: pw.BorderSide(color: _dividerGrey, width: 0.5),
+      ),
+      columnWidths: {
+        0: const pw.FixedColumnWidth(65),
+        1: const pw.FlexColumnWidth(2.2),
+        2: const pw.FlexColumnWidth(3.2),
+        3: const pw.FixedColumnWidth(85),
       },
-      cellStyle: pw.TextStyle(font: font, fontSize: 8, color: _darkText),
-      headers: ['DATE', 'EXPENSE DESCRIPTION', 'SPLIT STRATEGY', 'BASE BILL', 'TIPS', 'TOTAL AMOUNT'],
-      data: bills.map((bill) => [
-        DateFormat('MMM d, y').format(bill.date),
-        _sanitize(bill.reason?.isNotEmpty == true ? bill.reason! : 'General Expense'),
-        bill.isCustomSplit ? 'Custom Split' : 'Equal Split (${bill.people} pax)',
-        "${bill.currency} ${bill.bill.toStringAsFixed(2)}",
-        "${bill.currency} ${bill.tipAmount.toStringAsFixed(2)}",
-        "${bill.currency} ${(bill.bill + bill.tipAmount).toStringAsFixed(2)}"
-      ]).toList(),
+      defaultVerticalAlignment: pw.TableCellVerticalAlignment.middle,
+      children: [
+        pw.TableRow(
+          decoration: const pw.BoxDecoration(
+            color: _bgLight,
+            border: pw.Border(bottom: pw.BorderSide(color: _googleBlue, width: 2)),
+          ),
+          children: [
+            _buildTableHeaderCell('DATE', fontBold),
+            _buildTableHeaderCell('DESCRIPTION', fontBold),
+            _buildTableHeaderCell('PARTICIPANT BREAKDOWN', fontBold),
+            _buildTableHeaderCell('TOTAL', fontBold, align: pw.Alignment.centerRight),
+          ],
+        ),
+        ...bills.map((bill) {
+          final totalBill = bill.bill + bill.tipAmount;
+          return pw.TableRow(
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                child: pw.Text(DateFormat('MMM d, y').format(bill.date), style: pw.TextStyle(font: font, fontSize: 8, color: _googleGrey)),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(_sanitize(bill.reason?.isNotEmpty == true ? bill.reason! : 'General Expense'), 
+                        style: pw.TextStyle(font: fontBold, fontSize: 9, color: _darkText)),
+                    pw.SizedBox(height: 3),
+                    pw.Text(bill.isCustomSplit ? 'PRO-RATA SPLIT' : 'EQUAL (${bill.people} PAX)', 
+                        style: pw.TextStyle(font: font, fontSize: 7, color: _googleGrey, letterSpacing: 0.5)),
+                  ],
+                ),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                child: _buildEmbeddedSplitSummary(bill, font, fontBold),
+              ),
+              pw.Padding(
+                padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                child: pw.Text("${bill.currency} ${totalBill.toStringAsFixed(2)}", 
+                    style: pw.TextStyle(font: fontBold, fontSize: 10, color: _googleBlue), textAlign: pw.TextAlign.right),
+              ),
+            ],
+          );
+        }),
+      ],
     );
   }
 
-  static List<pw.Widget> _buildSettlementTables(TripAggregationResult result, pw.Font font, pw.Font fontBold) {
+  static pw.Widget _buildEmbeddedSplitSummary(HistoryItem bill, pw.Font font, pw.Font fontBold) {
+    final totalBill = bill.bill + bill.tipAmount;
+    
+    if (bill.isCustomSplit && bill.peopleList != null) {
+      return pw.Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        children: bill.peopleList!.map((p) {
+          final amount = totalBill * (p.percentage / 100);
+          return pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+            decoration: pw.BoxDecoration(
+              color: PdfColor(_dividerGrey.red, _dividerGrey.green, _dividerGrey.blue, 0.4),
+              borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+            ),
+            child: pw.RichText(
+              text: pw.TextSpan(
+                children: [
+                  pw.TextSpan(text: "${_sanitize(p.name)}: ", style: pw.TextStyle(font: font, fontSize: 7, color: _googleGrey)),
+                  pw.TextSpan(text: "${bill.currency} ${amount.toStringAsFixed(2)}", style: pw.TextStyle(font: fontBold, fontSize: 7, color: _darkText)),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      );
+    } else {
+      final share = totalBill / bill.people;
+      return pw.Text(
+        "Each of ${bill.people} members contributed ${bill.currency} ${share.toStringAsFixed(2)}",
+        style: pw.TextStyle(font: font, fontSize: 7.5, color: _googleGrey, fontStyle: pw.FontStyle.italic),
+      );
+    }
+  }
+
+  static pw.Widget _buildTableHeaderCell(String text, pw.Font fontBold, {pw.Alignment align = pw.Alignment.centerLeft}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(8),
+      child: pw.Container(
+        alignment: align,
+        child: pw.Text(text, style: pw.TextStyle(font: fontBold, fontSize: 8.5, color: _darkText, letterSpacing: 1.2)),
+      ),
+    );
+  }
+
+  static List<pw.Widget> _buildSettlementSummary(TripAggregationResult result, pw.Font font, pw.Font fontBold) {
     return result.perPersonTotals.entries.expand((entry) {
       final currency = entry.key;
       final people = entry.value;
       return [
         if (result.hasMixedCurrencies)
           pw.Padding(
-            padding: const pw.EdgeInsets.symmetric(vertical: 8),
-            child: pw.Text('CURRENCY: $currency', style: pw.TextStyle(font: fontBold, fontSize: 9, color: _googleBlue)),
+            padding: const pw.EdgeInsets.only(bottom: 10, top: 12),
+            child: pw.Text('SUMMARY ARCHIVE: $currency', style: pw.TextStyle(font: fontBold, fontSize: 9.5, color: _googleBlue, letterSpacing: 1)),
           ),
-        pw.TableHelper.fromTextArray(
+        pw.Table(
           border: pw.TableBorder.all(color: _borderGrey, width: 0.5),
-          headerStyle: pw.TextStyle(font: fontBold, color: PdfColors.white, fontSize: 10),
-          headerDecoration: const pw.BoxDecoration(color: _googleBlue),
-          oddRowDecoration: const pw.BoxDecoration(color: _bgLight),
-          cellHeight: 30,
-          cellAlignments: {
-            0: pw.Alignment.centerLeft,
-            1: pw.Alignment.centerRight,
-            2: pw.Alignment.centerRight,
+          columnWidths: {
+            0: const pw.FlexColumnWidth(3),
+            1: const pw.FlexColumnWidth(2),
+            2: const pw.FlexColumnWidth(1),
           },
-          cellStyle: pw.TextStyle(font: font, fontSize: 10, color: _darkText),
-          headers: ['PARTICIPANT NAME', 'NET CONTRIBUTION', 'SHARE %'],
-          data: people.map((p) => [
-            _sanitize(p.displayName),
-            "${p.totalAmount.toStringAsFixed(2)} $currency",
-            "${p.sharePercentage.toStringAsFixed(1)}%"
-          ]).toList(),
+          children: [
+            pw.TableRow(
+              decoration: const pw.BoxDecoration(color: _googleBlue),
+              children: [
+                _buildSettlementHeaderCell('PARTICIPANT NAME', fontBold),
+                _buildSettlementHeaderCell('TOTAL NET CONTRIBUTION', fontBold, align: pw.Alignment.centerRight),
+                _buildSettlementHeaderCell('SHARE %', fontBold, align: pw.Alignment.centerRight),
+              ],
+            ),
+            ...people.map((p) => pw.TableRow(
+              children: [
+                _buildSettlementCell(_sanitize(p.displayName), font),
+                _buildSettlementCell("${p.totalAmount.toStringAsFixed(2)} $currency", fontBold, align: pw.Alignment.centerRight, color: _googleBlue),
+                _buildSettlementCell("${p.sharePercentage.toStringAsFixed(1)}%", font, align: pw.Alignment.centerRight, color: _googleGrey),
+              ],
+            )),
+          ],
         ),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 24),
       ];
     }).toList();
+  }
+
+  static pw.Widget _buildSettlementHeaderCell(String text, pw.Font fontBold, {pw.Alignment align = pw.Alignment.centerLeft}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: pw.Container(
+        alignment: align,
+        child: pw.Text(text, style: pw.TextStyle(font: fontBold, fontSize: 9, color: PdfColors.white, letterSpacing: 0.5)),
+      ),
+    );
+  }
+
+  static pw.Widget _buildSettlementCell(String text, pw.Font font, {pw.Alignment align = pw.Alignment.centerLeft, PdfColor? color}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: pw.Container(
+        alignment: align,
+        child: pw.Text(text, style: pw.TextStyle(font: font, fontSize: 9.5, color: color ?? _darkText)),
+      ),
+    );
   }
 
   static pw.Widget _buildSecurityBadge(pw.Font font) {
@@ -324,16 +420,17 @@ class TripExportService {
       mainAxisAlignment: pw.MainAxisAlignment.end,
       children: [
         pw.Container(
-          padding: const pw.EdgeInsets.all(8),
+          padding: const pw.EdgeInsets.all(10),
           decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: _borderGrey),
-            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(4)),
+            border: pw.Border.all(color: _borderGrey, width: 1),
+            borderRadius: const pw.BorderRadius.all(pw.Radius.circular(6)),
           ),
           child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text('DIGITALLY GENERATED REPORT', style: pw.TextStyle(font: font, fontSize: 6, color: _googleGrey)),
-              pw.Text('AUTHENTICITY VERIFIED VIA SPLITNOVA CORE', style: pw.TextStyle(font: font, fontSize: 6, color: _googleGrey)),
+              pw.Text('DIGITALLY SECURED FINANCIAL REPORT', style: pw.TextStyle(font: font, fontSize: 6.5, color: _googleGrey, letterSpacing: 0.5)),
+              pw.SizedBox(height: 2),
+              pw.Text('AUTHENTICITY VERIFIED VIA SPLITNOVA CORE ENGINE', style: pw.TextStyle(font: font, fontSize: 6.5, color: _googleGrey, letterSpacing: 0.5)),
             ],
           ),
         ),
@@ -343,14 +440,14 @@ class TripExportService {
 
   static pw.Widget _buildFinancialDisclaimer(pw.Font fontItalic) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(12),
+      padding: const pw.EdgeInsets.all(14),
       decoration: pw.BoxDecoration(
         color: _bgLight,
         border: pw.Border(left: pw.BorderSide(color: _googleBlue, width: 4)),
       ),
       child: pw.Text(
-        'AUDIT NOTICE: This report provides a detailed breakdown of shared expenses. The "Grand Total" reflects the aggregate of all itemized logs including base costs and tips. Individual shares are calculated based on user-defined split strategies. Please verify all entries before final settlement.',
-        style: pw.TextStyle(font: fontItalic, fontSize: 8, color: _googleGrey),
+        'AUDIT NOTICE: This document provides a comprehensive reconciliation of shared financial obligations. Grand totals include base expenses and gratuities (tips). Individual share calculations are based on user-defined allocation strategies (Equal or Pro-Rata). Please verify all line items before initiating final settlement.',
+        style: pw.TextStyle(font: fontItalic, fontSize: 8.5, color: _googleGrey, height: 1.4),
       ),
     );
   }
@@ -358,7 +455,7 @@ class TripExportService {
   static pw.Widget _buildFooter(pw.Context context, pw.Font font) {
     return pw.Column(
       children: [
-        pw.Divider(color: _borderGrey, thickness: 0.5),
+        pw.Divider(color: _dividerGrey, thickness: 1),
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
@@ -367,18 +464,19 @@ class TripExportService {
               children: [
                 pw.Row(
                   children: [
-                    pw.Text('Generated by SplitNova', style: pw.TextStyle(font: font, color: _googleGrey, fontSize: 8)),
+                    pw.Text('Generated via SplitNova', style: pw.TextStyle(font: font, color: _googleGrey, fontSize: 8)),
                     pw.Padding(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 6),
-                      child: pw.Container(width: 1, height: 6, color: _borderGrey),
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 8),
+                      child: pw.Container(width: 1, height: 8, color: _borderGrey),
                     ),
                     pw.Text('Professional Expense Management', style: pw.TextStyle(font: font, color: _googleGrey, fontSize: 8)),
                   ],
                 ),
-                pw.Text('Issued on: ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}', style: pw.TextStyle(font: font, color: _googleGrey, fontSize: 7)),
+                pw.SizedBox(height: 2),
+                pw.Text('Timestamp: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())}', style: pw.TextStyle(font: font, color: _googleGrey, fontSize: 7)),
               ],
             ),
-            pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: pw.TextStyle(font: font, color: _googleGrey, fontSize: 8)),
+            pw.Text('Page ${context.pageNumber} of ${context.pagesCount}', style: pw.TextStyle(font: font, color: _googleGrey, fontSize: 8.5)),
           ],
         ),
       ],
@@ -387,7 +485,6 @@ class TripExportService {
 
   static String _sanitize(String? text) {
     if (text == null) return '';
-    // Remove emojis and non-standard characters to prevent PDF font crashes
     return text.replaceAll(RegExp(r'[^\x00-\x7F]'), '').trim();
   }
 

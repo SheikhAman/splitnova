@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../modules/history/history_controller.dart';
 
 class Person {
   final String id;
@@ -199,7 +200,7 @@ class TipController extends GetxController {
   void updateTip(double value) {
     tipPercent.value = value;
     isFixedTip.value = false;
-    tipTextController.text = value.toStringAsFixed(0);
+    tipTextController.text = value == 0 ? "" : value.toStringAsFixed(0);
     isCustomTip.value = false;
   }
 
@@ -233,11 +234,8 @@ class TipController extends GetxController {
 
   void toggleTipType(bool isFixed) {
     isFixedTip.value = isFixed;
-    if (isFixed) {
-      tipTextController.text = tipFixedAmount.value.toStringAsFixed(0);
-    } else {
-      tipTextController.text = tipPercent.value.toStringAsFixed(0);
-    }
+    final val = isFixed ? tipFixedAmount.value : tipPercent.value;
+    tipTextController.text = val == 0 ? "" : val.toStringAsFixed(0);
   }
 
   void incrementPeople() {
@@ -428,15 +426,16 @@ class TipController extends GetxController {
       int index = history.indexWhere((item) => item['id'] == editingHistoryId.value);
       if (index != -1) {
         history[index] = historyItem;
-        _showToast('success'.tr, 'history_updated'.tr);
+        _showUndoToast(historyItem['id'] as String, message: 'history_updated'.tr);
       } else {
         // Fallback if not found
         history.insert(0, historyItem);
+        _showUndoToast(historyItem['id'] as String);
       }
     } else {
       // Save as new
       history.insert(0, historyItem);
-      _showToast('success'.tr, 'saved_to_history'.tr);
+      _showUndoToast(historyItem['id'] as String);
     }
     
     _box.write('history', history);
@@ -445,8 +444,48 @@ class TipController extends GetxController {
     editingHistoryId.value = null; // Clear editing state after save
   }
 
-  void _navigateToHistory() {
-    selectedIndex.value = 1;
+  void _showUndoToast(String id, {String? message}) {
+    Get.rawSnackbar(
+      messageText: Row(
+        children: [
+          Expanded(
+            child: Text(
+              message ?? 'saved_to_history'.tr,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ),
+          Container(
+            height: 14,
+            width: 1,
+            color: Colors.white24,
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+          ),
+          GestureDetector(
+            onTap: () {
+              final List<dynamic> history = List.from(_box.read('history') ?? []);
+              history.removeWhere((item) => item['id'] == id);
+              _box.write('history', history);
+              if (Get.isSnackbarOpen) Get.back();
+            },
+            child: Text(
+              'undo'.tr.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ],
+      ),
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 50),
+      borderRadius: 100,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      duration: const Duration(seconds: 3),
+      isDismissible: true,
+    );
   }
 
   void _showToast(String title, String message) {
@@ -458,6 +497,12 @@ class TipController extends GetxController {
       textColor: Colors.white,
       fontSize: 14.0,
     );
+  }
+
+  void _navigateToHistory() {
+    selectedIndex.value = 1;
+    final historyController = Get.find<HistoryController>();
+    historyController.selectedTab.value = 0; // Go to Bills sub-tab
   }
 
   String get shareMessage {

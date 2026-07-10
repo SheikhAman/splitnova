@@ -19,6 +19,9 @@ class HistoryController extends GetxController {
   var historyList = <dynamic>[].obs;
   final qrScreenshotController = ScreenshotController();
 
+  // Tab management (0: Bills, 1: Trips)
+  var selectedTab = 0.obs;
+
   // Selection Mode States
   var isSelectionMode = false.obs;
   var selectedIds = <String>[].obs;
@@ -177,12 +180,58 @@ class HistoryController extends GetxController {
   }
 
   void deleteSelectedItems() {
+    final List<dynamic> backup = List.from(historyList);
     final idsToRemove = Set.from(selectedIds);
+    
     historyList.removeWhere((item) => idsToRemove.contains(item['id'].toString()));
     _box.write('history', historyList.toList());
     
+    _showUndoDeleteToast(backup);
+    
     selectedIds.clear();
     isSelectionMode.value = false;
+  }
+
+  void _showUndoDeleteToast(List<dynamic> backup) {
+    Get.rawSnackbar(
+      messageText: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'items_deleted'.tr,
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          ),
+          Container(
+            height: 16,
+            width: 1,
+            color: Colors.white24,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+          ),
+          GestureDetector(
+            onTap: () {
+              historyList.value = backup;
+              _box.write('history', backup);
+              if (Get.isSnackbarOpen) Get.back();
+            },
+            child: Text(
+              'undo'.tr.toUpperCase(),
+              style: const TextStyle(
+                color: Colors.orange,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.black.withOpacity(0.8),
+      margin: const EdgeInsets.symmetric(horizontal: 70, vertical: 50),
+      borderRadius: 100,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      duration: const Duration(seconds: 4),
+    );
   }
 
   void deleteItem(int index) {

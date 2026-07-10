@@ -258,7 +258,7 @@ class SettingsView extends GetView<SettingsController> {
                 onChanged: (val) => controller.updateDefaultTip(val!),
                 icon: Icon(Icons.keyboard_arrow_down, color: Get.theme.primaryColor),
                 style: TextStyle(color: Get.theme.primaryColor, fontWeight: FontWeight.bold, fontSize: AppSizes.fontM),
-                items: [5.0, 10.0, 15.0, 20.0, 25.0]
+                items: [0.0, 5.0, 10.0, 15.0, 20.0, 25.0]
                     .map((e) => DropdownMenuItem(value: e, child: Text('${e.toInt()}%')))
                     .toList(),
               ),

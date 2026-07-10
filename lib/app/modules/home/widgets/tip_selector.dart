@@ -24,34 +24,105 @@ class TipSelector extends StatelessWidget {
           ),
         ),
         SizedBox(height: AppSizes.paddingM),
-        Wrap(
-          spacing: AppSizes.paddingS,
-          runSpacing: AppSizes.paddingS,
-          children: [
-            ...tipPercentages.map((tip) => Obx(() {
-                  bool isSelected = controller.tipPercent.value == tip && !controller.isCustomTip.value;
-                  return _buildTipButton(
-                    context,
-                    tip.toInt().toString() + "%",
-                    isSelected,
-                    () {
-                      FocusManager.instance.primaryFocus?.unfocus();
-                      controller.updateTip(tip);
-                    },
-                  );
-                })),
-            Obx(() => _buildTipButton(
-                  context,
-                  'custom'.tr,
-                  controller.isCustomTip.value,
-                  () {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                    _showCustomTipBottomSheet(context, controller);
-                  },
-                )),
-          ],
+        Obx(() => AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: controller.isCustomTip.value
+                  ? _buildCustomTipInput(context, controller)
+                  : _buildTipPresets(context, controller, tipPercentages),
+            )),
+      ],
+    );
+  }
+
+  Widget _buildTipPresets(BuildContext context, TipController controller, List<double> tipPercentages) {
+    return Wrap(
+      key: const ValueKey('presets'),
+      spacing: AppSizes.paddingS,
+      runSpacing: AppSizes.paddingS,
+      children: [
+        _buildTipButton(
+          context,
+          "0%",
+          controller.tipPercent.value == 0 && !controller.isFixedTip.value,
+          () => controller.updateTip(0),
+        ),
+        ...tipPercentages.map((tip) {
+          bool isSelected = controller.tipPercent.value == tip && !controller.isFixedTip.value;
+          return _buildTipButton(
+            context,
+            tip.toInt().toString() + "%",
+            isSelected,
+            () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              controller.updateTip(tip);
+            },
+          );
+        }),
+        _buildTipButton(
+          context,
+          'custom'.tr,
+          false,
+          () => controller.isCustomTip.value = true,
         ),
       ],
+    );
+  }
+
+  Widget _buildCustomTipInput(BuildContext context, TipController controller) {
+    return Container(
+      key: const ValueKey('custom_input'),
+      padding: EdgeInsets.all(AppSizes.paddingM),
+      decoration: BoxDecoration(
+        color: Get.isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(AppSizes.radiusM),
+        border: Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          // Toggle between % and Currency
+          GestureDetector(
+            onTap: () => controller.toggleTipType(!controller.isFixedTip.value),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(AppSizes.radiusS),
+              ),
+              child: Text(
+                controller.isFixedTip.value ? controller.currencySymbol : "%",
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          SizedBox(width: AppSizes.paddingM),
+          Expanded(
+            child: TextField(
+              controller: controller.tipTextController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              autofocus: true,
+              style: TextStyle(
+                fontSize: AppSizes.fontL,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+              decoration: InputDecoration(
+                hintText: "0",
+                isDense: true,
+                border: InputBorder.none,
+                suffixText: controller.isFixedTip.value ? null : "%",
+              ),
+              onChanged: (val) => controller.updateTipFromText(val),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            onPressed: () {
+              controller.isCustomTip.value = false;
+              // Reset to a default or keep the value but show presets
+            },
+          ),
+        ],
+      ),
     );
   }
 
