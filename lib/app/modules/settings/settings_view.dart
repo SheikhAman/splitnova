@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import '../../core/values/app_constants.dart';
 import 'settings_controller.dart';
@@ -31,6 +32,9 @@ class SettingsView extends GetView<SettingsController> {
           children: [
             SizedBox(height: AppSizes.paddingXXL),
             _buildAppHeader(context),
+            SizedBox(height: AppSizes.paddingL),
+
+            _buildSupportDeveloperTile(context),
             SizedBox(height: AppSizes.paddingL),
             
             _buildSectionTitle('appearance'.tr),
@@ -91,7 +95,6 @@ class SettingsView extends GetView<SettingsController> {
             _buildDefaultSettings(context),
 
             SizedBox(height: AppSizes.paddingL),
-            _buildSupportSection(context),
             _buildSocialSection(context),
             _buildContactSection(context),
             _buildAboutSection(context),
@@ -200,7 +203,7 @@ class SettingsView extends GetView<SettingsController> {
             trailing: Switch(
               value: theme.isDarkMode.value,
               onChanged: (val) => theme.toggleTheme(),
-              activeColor: Get.theme.primaryColor,
+            activeThumbColor: Get.theme.primaryColor,
             ),
           ),
           Divider(indent: 56.0, endIndent: AppSizes.paddingL, height: 1),
@@ -323,29 +326,6 @@ class SettingsView extends GetView<SettingsController> {
         ),
         child: Icon(icon, size: AppSizes.iconS, color: Get.theme.primaryColor),
       ),
-    );
-  }
-
-  Widget _buildSupportSection(BuildContext context) {
-    final DonationConfig? donation = controller.configs['donation'];
-    if (donation == null) return const SizedBox();
-
-    return _buildExpandableSection(
-      context: context,
-      title: 'support_development'.tr,
-      icon: Icons.favorite_border_rounded,
-      children: [
-        if (donation.bkash.isNotEmpty)
-          _buildCopyTile('bkash'.tr, donation.bkash, Icons.account_balance_wallet_rounded),
-        if (donation.nagad.isNotEmpty)
-          _buildCopyTile('nagad'.tr, donation.nagad, Icons.account_balance_wallet_rounded),
-        if (donation.rocket.isNotEmpty)
-          _buildCopyTile('rocket'.tr, donation.rocket, Icons.account_balance_wallet_rounded),
-        if (donation.buyMeCoffee.isNotEmpty)
-          _buildLinkTile('buy_me_coffee'.tr, donation.buyMeCoffee, Icons.coffee_rounded),
-        if (donation.githubSponsors.isNotEmpty)
-          _buildLinkTile('github_sponsors'.tr, donation.githubSponsors, Icons.favorite_rounded),
-      ],
     );
   }
 
@@ -575,6 +555,67 @@ class SettingsView extends GetView<SettingsController> {
     );
   }
 
+
+  Widget _buildSupportDeveloperTile(BuildContext context) {
+    return Card(
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSizes.radiusL),
+        side: BorderSide(color: Get.theme.primaryColor.withValues(alpha: 0.3), width: 1.5),
+      ),
+      child: InkWell(
+        onTap: () => controller.openSupportDeveloperModal(context),
+        child: Container(
+          padding: EdgeInsets.all(AppSizes.paddingL),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Get.theme.primaryColor.withValues(alpha: 0.05),
+                Get.theme.primaryColor.withValues(alpha: 0.1),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(AppSizes.paddingM),
+                decoration: BoxDecoration(
+                  color: Get.theme.primaryColor,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.favorite_rounded, color: Colors.white, size: 24),
+              ),
+              SizedBox(width: AppSizes.paddingL),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'support_developer'.tr,
+                      style: TextStyle(fontSize: AppSizes.fontL, fontWeight: FontWeight.bold, color: Get.theme.primaryColor),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'support_dev_subtitle'.tr,
+                      style: TextStyle(fontSize: AppSizes.fontS, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Get.theme.primaryColor),
+            ],
+          ),
+        ),
+      ),
+    ).animate().fadeIn(duration: 800.ms).slideX(begin: 0.1);
+  }
+
+  void _showSupportBottomSheet(BuildContext context) {
+    controller.openSupportDeveloperModal(context);
+  }
 
   void _showLanguageSelector(BuildContext context, LanguageController lang) {
     Get.bottomSheet(

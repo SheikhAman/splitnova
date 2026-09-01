@@ -23,6 +23,7 @@ class FirebaseService extends GetxService {
 
   AppConfig? get appConfig => _appConfig.value;
   SupportConfig? get supportConfig => _supportConfig.value;
+  String get packageName => _packageInfo?.packageName ?? 'com.unknown.app';
 
   @override
   void onInit() {

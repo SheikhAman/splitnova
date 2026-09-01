@@ -9,6 +9,7 @@ import 'app/controllers/language_controller.dart';
 import 'app/controllers/tip_controller.dart';
 import 'app/controllers/trip_controller.dart';
 import 'app/services/firebase_service.dart';
+import 'app/data/services/paddle_service.dart';
 
 import 'translations/app_translations.dart';
 
@@ -18,9 +19,9 @@ void main() async {
   // Initialize storage
   await GetStorage.init();
   
-  // 1. Put FirebaseService immediately so it's available for Get.find()
-  // It handles its own internal initialization asynchronously.
+  // 1. Put Services
   Get.put(FirebaseService(), permanent: true);
+  Get.put(PaddleService(), permanent: true);
 
   // 2. Initialize essential controllers
   Get.put(ThemeController(), permanent: true);
