@@ -13,12 +13,10 @@ import '../config_screens/views/force_update_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../data/services/paddle_service.dart';
 
 class SettingsController extends GetxController {
   final _firebaseService = Get.find<FirebaseService>();
   final _updateService = Get.find<AppUpdateService>();
-  final _paddleService = Get.find<PaddleService>();
   final tipController = Get.find<TipController>();
 
   final RxMap configs = {}.obs;
@@ -95,45 +93,6 @@ class SettingsController extends GetxController {
     if (Get.context != null) {
       openSupportDeveloperModal(Get.context!);
     }
-  }
-
-  void _showThankYouDialog() {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusXXL)),
-        child: Padding(
-          padding: EdgeInsets.all(AppSizes.paddingXXL),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.favorite_rounded, color: Colors.redAccent, size: 64)
-                  .animate()
-                  .scale(duration: 600.ms, curve: Curves.elasticOut)
-                  .then()
-                  .shake(duration: 400.ms),
-              SizedBox(height: AppSizes.paddingXL),
-              Text('thank_you'.tr, style: TextStyle(fontSize: AppSizes.fontXXL, fontWeight: FontWeight.bold)),
-              SizedBox(height: AppSizes.paddingM),
-              Text(
-                'thank_you_msg'.tr,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: AppSizes.fontM, color: Colors.grey[600]),
-              ),
-              SizedBox(height: AppSizes.paddingXXL),
-              ElevatedButton(
-                onPressed: () => Get.back(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Get.theme.primaryColor,
-                  minimumSize: const Size(double.infinity, 50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSizes.radiusL)),
-                ),
-                child: Text('close'.tr, style: const TextStyle(color: Colors.white)),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
   void updateDefaultPeople(int val) => tipController.updateDefaultPeople(val);
   void updateDefaultCurrency(String val) => tipController.updateDefaultCurrency(val);

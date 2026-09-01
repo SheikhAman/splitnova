@@ -31,7 +31,6 @@ class SupportDeveloperModal extends StatelessWidget {
       rocket: '',
       buyMeCoffee: '',
       githubSponsors: '',
-      paddleBackendUrl: '',
     );
   }
 

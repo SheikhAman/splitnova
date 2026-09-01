@@ -48,7 +48,6 @@ class DonationConfig {
   final String rocket;
   final String buyMeCoffee;
   final String githubSponsors;
-  final String paddleBackendUrl;
 
   DonationConfig({
     required this.bkash,
@@ -56,7 +55,6 @@ class DonationConfig {
     required this.rocket,
     required this.buyMeCoffee,
     required this.githubSponsors,
-    required this.paddleBackendUrl,
   });
 
   bool get isEmpty =>
@@ -64,8 +62,7 @@ class DonationConfig {
       nagad.isEmpty &&
       rocket.isEmpty &&
       buyMeCoffee.isEmpty &&
-      githubSponsors.isEmpty &&
-      paddleBackendUrl.isEmpty;
+      githubSponsors.isEmpty;
 
   bool get isNotEmpty => !isEmpty;
   bool get hasBdDonations => bkash.isNotEmpty || nagad.isNotEmpty || rocket.isNotEmpty;
@@ -78,7 +75,6 @@ class DonationConfig {
       'rocket': rocket,
       'buy_me_coffee': buyMeCoffee,
       'github_sponsors': githubSponsors,
-      'paddle_backend_url': paddleBackendUrl,
     }..removeWhere((key, value) => value.isEmpty);
   }
 
@@ -89,7 +85,6 @@ class DonationConfig {
       rocket: map['rocket'] ?? '',
       buyMeCoffee: map['buyMeCoffee'] ?? '',
       githubSponsors: map['githubSponsors'] ?? '',
-      paddleBackendUrl: map['paddle_backend_url'] ?? '',
     );
   }
 
@@ -99,7 +94,6 @@ class DonationConfig {
         rocket: '',
         buyMeCoffee: '',
         githubSponsors: '',
-        paddleBackendUrl: '',
       );
 }
 

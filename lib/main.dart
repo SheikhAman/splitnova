@@ -9,7 +9,6 @@ import 'app/controllers/language_controller.dart';
 import 'app/controllers/tip_controller.dart';
 import 'app/controllers/trip_controller.dart';
 import 'app/services/firebase_service.dart';
-import 'app/data/services/paddle_service.dart';
 
 import 'translations/app_translations.dart';
 
@@ -21,7 +20,6 @@ void main() async {
   
   // 1. Put Services
   Get.put(FirebaseService(), permanent: true);
-  Get.put(PaddleService(), permanent: true);
 
   // 2. Initialize essential controllers
   Get.put(ThemeController(), permanent: true);
